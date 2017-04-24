@@ -41,11 +41,17 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "libmca-rdround.h"
 #include "../vfcwrapper/vfcwrapper.h"
 #include "../common/tinymt64.h"
 #include "../common/mca_const.h"
+
+
+#include <fenv.h>
+#pragma STDC FENV_ACCESS ON
+
 
 static int 	MCALIB_OP_TYPE 		= MCAMODE_IEEE;
 static int 	MCALIB_T		    = 53;
@@ -57,7 +63,7 @@ static int 	MCALIB_T		    = 53;
 #define MCA_DIV 4
 
 #define PLUS_INF_RD 0
-#define MINUS_INF_RD 0
+#define MINUS_INF_RD 1
 
 static float _mca_sbin(float a, float b, int qop);
 
@@ -69,19 +75,14 @@ static double _mca_dbin(double a, double b, int qop);
 ***************************************************************/
 
 static int _set_mca_mode(int mode){
-	//mode has no effect in random rounding
-	//only ieee remains usefull, others are equivalent
-	if (mode < 0 || mode > 3)
-		return -1;
-
+	//useless for rd_round
 	MCALIB_OP_TYPE = mode;
 	return 0;
 }
 
 static int _set_mca_precision(int precision){
-	//the random rounding only switch the last bit
-	//unused variable in random rounding 
-	MCALIB_T = 53;
+	//useless for rd_round
+	MCALIB_T = precision;
 	return 0;
 }
 
@@ -103,12 +104,11 @@ static double _mca_rand(void) {
 static bool set_random_rounding() {
 
 	if (MCALIB_OP_TYPE == MCAMODE_IEEE) {
-		//in that case the rounding hasn't been switch to +inf in the init
-		//and so the boolean should be positioned to use the +inf operator which basically execute the original code
-		return PLUS_INF_RD;
+		fprintf(stderr, "IEEE is not a valid mode for random rounding\n");
 	}
-	uint64_t u_rand = *((uint64_t*) &(_mca_rand() - 0.5));
-	return (bool) (u_rand>>63);
+	double d_rand=_mca_rand();
+	uint64_t u_rand = *((uint64_t*) &(d_rand));
+	return (bool) (u_rand&&0xFFFFFFFE);
 	
 }
 
@@ -124,6 +124,9 @@ static void _mca_seed(void) {
 	init_key[2] = getpid();
 
 	tinymt64_init_by_array(&random_state, init_key, key_length);
+	
+	//set the rounding mode toward +inf
+	fesetround(FE_UPWARD);
 }
 
 /******************** MCA ARITHMETIC FUNCTIONS ********************
@@ -156,23 +159,23 @@ static void _mca_seed(void) {
 
 
 
-static inline float _mca_sbin(float a, float b,const int  dop) {
+static inline float _mca_sbin(float a, float b,const int  sop) {
 
     float res=0;
     bool round_switch=set_random_rounding();
-    if (bool==PLUS_INF_RD){
-    	perform_bin_op_plus_inf(sop, res, a, b);
+    if (round_switch==PLUS_INF_RD){
+    	 perform_bin_op_plus_inf(sop, res, a, b);
     }else{
     	 perform_bin_op_minus_inf(sop, res, a, b);
     }
     return res;
 }
 
-static inline double _mca_dbin(double a, double b, const int qop) {
+static inline double _mca_dbin(double a, double b, const int dop) {
 	
     double res=0;
     bool round_switch=set_random_rounding();
-    if (bool==PLUS_INF_RD){
+    if (round_switch==PLUS_INF_RD){
     	perform_bin_op_plus_inf(dop, res, a, b);
     }else{
     	 perform_bin_op_minus_inf(dop, res, a, b);

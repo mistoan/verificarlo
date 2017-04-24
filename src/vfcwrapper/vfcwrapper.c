@@ -31,6 +31,7 @@
 
 #include "libmca-mpfr.h"
 #include "libmca-quad.h"
+#include "libmca-rdround.h"
 
 #define VERIFICARLO_PRECISION "VERIFICARLO_PRECISION"
 #define VERIFICARLO_MCAMODE "VERIFICARLO_MCAMODE"
@@ -62,13 +63,21 @@ static void vfc_select_interface_quad(void) {
     _vfc_current_mca_interface.set_mca_mode(verificarlo_mcamode);
 }
 
+/* Activates the rdround MCA backend */
+static void vfc_select_interface_rdround(void) {
+    _vfc_current_mca_interface = rdround_mca_interface;
+    //useless command for rdround, wait interface specification to decide wether or not to keep it
+    _vfc_current_mca_interface.set_mca_precision(verificarlo_precision);
+    _vfc_current_mca_interface.set_mca_mode(verificarlo_mcamode);
+}
 
 
 
 /* seeds all the MCA backends */
 void vfc_seed(void) {
     mpfr_mca_interface.seed();
-    quad_mca_interface.seed();
+    quad_mca_interface.seed(); 
+    rdround_mca_interface.seed();
 }
 
 /* sets verificarlo precision and mode. Returns 0 on success. */
@@ -85,6 +94,9 @@ int vfc_set_precision_and_mode(unsigned int precision, int mode) {
     }
     else if (verificarlo_backend == MCABACKEND_QUAD){
       vfc_select_interface_quad();
+    }
+    else if (verificarlo_backend == MCABACKEND_RDROUND){
+      vfc_select_interface_rdround();
     }
     else {
     	perror("Invalid backend name in backend setting\n");
@@ -139,6 +151,9 @@ static void vfc_init (void)
     if (backend != NULL) {
       if (strcmp("QUAD", backend) == 0) {
         verificarlo_backend = MCABACKEND_QUAD;
+      }
+      else if (strcmp("RDROUND", backend) == 0) {
+        verificarlo_backend = MCABACKEND_RDROUND;
       }
       else if (strcmp("MPFR", backend) == 0) {
         verificarlo_backend = MCABACKEND_MPFR;

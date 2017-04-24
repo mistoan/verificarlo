@@ -22,4 +22,4 @@
  ********************************************************************************/
 
 struct mca_interface_t;
-extern struct mca_interface_t mpfr_mca_interface;
+extern struct mca_interface_t rdround_mca_interface;

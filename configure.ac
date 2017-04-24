@@ -122,6 +122,7 @@ AC_CONFIG_FILES([Makefile
                  src/libvfcinstrument/Makefile
                  src/libmca-mpfr/Makefile
 		 src/libmca-quad/Makefile
+		 src/libmca-rdround/Makefile
 		 src/common/Makefile
                  tests/Makefile])
 

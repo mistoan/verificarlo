@@ -1,5 +1,5 @@
 lib_LTLIBRARIES = libmcardround.la
-libmcardround_la_SOURCES = mcalib.c ../common/tinymt64.c
+libmcardround_la_SOURCES = mcalib.c 
 EXTRA_DIST = libmca-rdround.h
 libmcardround_la_LDFLAGS = -lm
 library_includedir =$(includedir)/
