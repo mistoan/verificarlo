@@ -66,6 +66,15 @@ static void vfc_select_interface_quad(void) {
     _vfc_current_mca_interface.set_mca_mode(verificarlo_mcamode);
 }
 
+
+/* Activates the bitmask backend */
+static void vfc_select_interface_bitmask(void) {
+    _vfc_current_mca_interface = bitmask_interface;
+    _vfc_current_mca_interface.set_mca_precision(verificarlo_precision);
+    _vfc_current_mca_interface.set_mca_mode(verificarlo_bitmask_mode);
+}
+
+
 /* Activates the rdround MCA backend */
 static void vfc_select_interface_rdround(void) {
     _vfc_current_mca_interface = rdround_mca_interface;
@@ -103,7 +112,7 @@ int vfc_set_precision_and_mode(unsigned int precision, int mode) {
     case BACKEND_BITMASK:
       vfc_select_interface_bitmask();
       break;
-    case MCABACKEND_RDROUND
+    case MCABACKEND_RDROUND:
       vfc_select_interface_rdround();
       break;
     default:
