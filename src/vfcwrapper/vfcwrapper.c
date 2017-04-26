@@ -32,19 +32,22 @@
 #include "libmca-mpfr.h"
 #include "libmca-quad.h"
 #include "libmca-rdround.h"
+#include "libbitmask.h"
 
 #define VERIFICARLO_PRECISION "VERIFICARLO_PRECISION"
 #define VERIFICARLO_MCAMODE "VERIFICARLO_MCAMODE"
 #define VERIFICARLO_BACKEND "VERIFICARLO_BACKEND"
+#define VERIFICARLO_BITMASK_MODE "VERIFICARLO_BITMASK_MODE"
 #define VERIFICARLO_PRECISION_DEFAULT 53
 #define VERIFICARLO_MCAMODE_DEFAULT MCAMODE_MCA
 #define VERIFICARLO_BACKEND_DEFAULT MCABACKEND_MPFR
-
+#define VERIFICARLO_BITMASK_MODE_DEFAULT BITMASK_MODE_ZERO
 
 /* Set default values for MCA*/
 int verificarlo_precision = VERIFICARLO_PRECISION_DEFAULT;
 int verificarlo_mcamode = VERIFICARLO_MCAMODE_DEFAULT;
 int verificarlo_backend = VERIFICARLO_BACKEND_DEFAULT;
+int verificarlo_bitmask_mode = VERIFICARLO_BITMASK_MODE_DEFAULT;
 
 /* This is the vtable for the current MCA backend */
 struct mca_interface_t _vfc_current_mca_interface;
@@ -69,6 +72,7 @@ static void vfc_select_interface_rdround(void) {
     //useless command for rdround, wait interface specification to decide wether or not to keep it
     _vfc_current_mca_interface.set_mca_precision(verificarlo_precision);
     _vfc_current_mca_interface.set_mca_mode(verificarlo_mcamode);
+    _vfc_current_mca_interface.set_mca_mode(verificarlo_bitmask_mode);
 }
 
 
@@ -78,6 +82,7 @@ void vfc_seed(void) {
     mpfr_mca_interface.seed();
     quad_mca_interface.seed(); 
     rdround_mca_interface.seed();
+    bitmask_interface.seed();
 }
 
 /* sets verificarlo precision and mode. Returns 0 on success. */
@@ -88,20 +93,24 @@ int vfc_set_precision_and_mode(unsigned int precision, int mode) {
     verificarlo_precision = precision;
     verificarlo_mcamode = mode;
 
-    /* Choose the required backend */
-    if (verificarlo_backend == MCABACKEND_MPFR) {
+    switch (verificarlo_backend) {
+    case MCABACKEND_MPFR:
       vfc_select_interface_mpfr();
-    }
-    else if (verificarlo_backend == MCABACKEND_QUAD){
+      break;
+    case MCABACKEND_QUAD:
       vfc_select_interface_quad();
-    }
-    else if (verificarlo_backend == MCABACKEND_RDROUND){
+      break;
+    case BACKEND_BITMASK:
+      vfc_select_interface_bitmask();
+      break;
+    case MCABACKEND_RDROUND
       vfc_select_interface_rdround();
+      break;
+    default:
+      perror("Invalid backend name in backend setting\n");
+      exit(-1);      
     }
-    else {
-    	perror("Invalid backend name in backend setting\n");
-	exit(-1);
-    }
+
     return 0;
 }
 
@@ -157,13 +166,34 @@ static void vfc_init (void)
       }
       else if (strcmp("MPFR", backend) == 0) {
         verificarlo_backend = MCABACKEND_MPFR;
-      }else {
+      }
+      else if (strcmp("BITMASK", backend) == 0) {
+	verificarlo_backend = BACKEND_BITMASK;     
+      } else {
         /* Invalid value provided */
         fprintf(stderr, VERIFICARLO_BACKEND
-                " invalid value provided, defaulting to default\n");
+                " invalid value provided, defaulting to default %s\n",backend);
       }
     }
 
+    char *bitmask_mode = getenv(VERIFICARLO_BITMASK_MODE);
+    if (bitmask_mode != NULL) {
+      if (strcmp("ZERO", bitmask_mode) == 0) {
+        verificarlo_bitmask_mode = BITMASK_MODE_ZERO;
+      }
+      else if (strcmp("INV", bitmask_mode) == 0) {
+        verificarlo_bitmask_mode = BITMASK_MODE_INV;
+      }
+      else if (strcmp("RAND", bitmask_mode) == 0) {
+        verificarlo_bitmask_mode = BITMASK_MODE_RAND;
+      } else {
+        /* Invalid value provided */
+        fprintf(stderr, VERIFICARLO_BITMASK_MODE
+                " invalid value provided, defaulting to default %s\n",bitmask_mode);
+      }
+      
+    }
+    
     /* seed the backends */
     vfc_seed();
 

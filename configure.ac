@@ -123,8 +123,10 @@ AC_CONFIG_FILES([Makefile
                  src/libmca-mpfr/Makefile
 		 src/libmca-quad/Makefile
 		 src/libmca-rdround/Makefile
+		 src/libbitmask/Makefile
+		 src/libvfcreport/Makefile
 		 src/common/Makefile
-                 tests/Makefile])
+		 tests/Makefile])
 
 AC_CONFIG_FILES([verificarlo.in], [])
 
