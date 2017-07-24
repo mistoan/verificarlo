@@ -67,7 +67,7 @@ static uint64_t index_bitarray = 0;
 ***************************************************************/
 
 static int _set_mca_mode(int mode){
-  if (mode < 0 || mode > 2)
+  if (mode < 0 || mode > 3)
     return -1;
   
   BITMASKLIB_MODE = mode;
@@ -81,7 +81,9 @@ static int _set_mca_precision(int precision){
   MCALIB_T = precision;
   float_bitmask  = (MCALIB_T <= FLOAT_PREC)  ? (-1)    << (FLOAT_PREC  - MCALIB_T) : FLOAT_MASK_1;
   double_bitmask = (MCALIB_T <= DOUBLE_PREC) ? (-1ULL) << (DOUBLE_PREC - MCALIB_T) : DOUBLE_MASK_1;
-  index_bitarray = tinymt64_generate_uint64(&random_state) % (SIZE_BITARRAY / sizeof(uint64_t));
+  uint64_t rdbitfield_seedindex=tinymt64_generate_uint64(&random_state);
+  index_bitarray = rdbitfield_seedindex % (SIZE_BITARRAY / sizeof(uint64_t));
+//  printf("DEBUG: first index in random bitfield: %" PRId64 "\n",index_bitarray);
   return 0;
 }
 
@@ -94,14 +96,16 @@ static int _set_mca_precision(int precision){
 static uint32_t get_random_smask(void){
   uint32_t *ptr_32 = (uint32_t*)&random_bitarray;
   uint32_t smask = ptr_32[index_bitarray]; 
-  index_bitarray = (index_bitarray+1) % (SIZE_BITARRAY / sizeof(uint32_t));
+  index_bitarray = (index_bitarray+4) % (SIZE_BITARRAY / sizeof(uint32_t));
+  //printf("DEBUG: single bitmask pseudo rand noise: %" PRId32 "\n",smask);
   return smask;
 }
 
 static uint64_t get_random_dmask(void) { 
-  uint64_t *ptr_64 = (uint64_t*)&random_bitarray;
+  uint64_t *ptr_64 = (uint64_t*)&random_bitarray; 
   uint64_t dmask = ptr_64[index_bitarray]; 
-  index_bitarray = (index_bitarray+1) % (SIZE_BITARRAY / sizeof(uint64_t));
+  index_bitarray = (index_bitarray+8) % (SIZE_BITARRAY / sizeof(uint64_t));
+  //printf("DEBUG: double bitmask pseudo rand noise: %" PRId64 "\n",dmask);
   return dmask;
 }
 

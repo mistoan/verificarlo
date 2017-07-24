@@ -40,7 +40,7 @@ double genSum_fromFile(double *x, double *C, unsigned int n, int c_exp)
 
 
 	for(i=0; i<n; i++) b += fabs(x[i]);
-	s = AccSum(x, n);
+	s = GAccSum(x, n);
 	*C = b / fabs(s);
 	
 	return s;

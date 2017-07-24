@@ -103,9 +103,9 @@ static double _mca_rand(void) {
 
 static bool set_random_rounding() {
 
-	if (MCALIB_OP_TYPE == MCAMODE_IEEE) {
-		fprintf(stderr, "IEEE is not a valid mode for random rounding\n");
-	}
+//	if (MCALIB_OP_TYPE == MCAMODE_IEEE) {
+//		fprintf(stderr, "IEEE is not a valid mode for random rounding\n");
+//	}
 	double d_rand=_mca_rand();
 	uint64_t u_rand = *((uint64_t*) &(d_rand));
 	return (bool) (u_rand&&0xFFFFFFFE);

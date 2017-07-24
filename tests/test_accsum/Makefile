@@ -31,7 +31,7 @@ VERIFICARLO=verificarlo
 VERIFICARLO_OPT=-O3
 VERIFICARLO_I= -I ./src -I /usr/include/ -I ./
 VERIFICARLO_L= -fopenmp -lm -fno-inline
-VERIFICARLO_FLAG=
+VERIFICARLO_FLAG= --verbose --functions-file mca_function.txt 
 
 
 

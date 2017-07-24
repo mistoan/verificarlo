@@ -115,7 +115,7 @@ def add_header_verificarlo_report(report_level, print_percentage):
     vr_file.write(header+"\n")
 
 def linker_mode(sources, options, output, args):
-    shell('{clang} -c -O2 -static -o .vfcwrapper.o {vfcwrapper} -I {mcalib_includes}'.format(
+    shell('{clang} -fPIC -c -O0  -o .vfcwrapper.o {vfcwrapper} -I {mcalib_includes}'.format(
         clang=clang,
         vfcwrapper=vfcwrapper,
         mcalib_includes=mcalib_includes))
