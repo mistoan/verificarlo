@@ -35,8 +35,13 @@ double AccSumParIn(double *, unsigned int );
 double GAccSumIn(double *, unsigned int );
 double AccSum(double *, unsigned int );
 double GAccSum(double *, unsigned int );
+double ParaChunkAcc(double *, unsigned int );
 
 
+
+#ifdef PARACHUNKACC
+double ParaChunkAccIn(double *, unsigned int );
+#endif
 #ifdef FASTACCSUM
 double FastAccSumIn(double *, unsigned int );
 #endif

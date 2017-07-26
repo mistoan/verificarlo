@@ -138,6 +138,43 @@ for(i_n=NB_N_MIN;i_n<NB_N*NB_N_STRIDE+NB_N_MIN;i_n+=NB_N_STRIDE)
 #endif
 #endif		
 
+
+
+		//------------------------------
+                //----------ParaChunkAcc test --------
+                //------------------------------
+#ifdef PARACHUNKACC
+                double R14;
+                Test_macro_WarmUp(ParaChunkAccIn,SIZE,R14);
+
+#ifdef TIME
+                if (VERBOSE_TEST>0) printf("ParaChunkAcc test tsc:\n");
+                Test_macro_TIME(ParaChunkAccIn,SIZE);
+#endif
+
+#ifdef PAPI
+                if (VERBOSE_TEST>0) printf("ParaChunkAcc test PAPI-C:\n");
+
+#ifdef PAPI_FLOPS               
+                Test_macro_PAPI_FLOPS(ParaChunkAccIn,SIZE);
+#endif
+
+
+#ifdef PAPI_FLIPS               
+                Test_macro_PAPI_FLIPS(ParaChunkAccIn,SIZE);
+#endif
+
+
+#ifdef PAPI_TEST                
+                Test_macro_PAPI_TEST(ParaChunkAccIn,SIZE);
+#endif
+
+#ifdef PAPI_IPC         
+                Test_macro_PAPI_IPC(ParaChunkAccIn,SIZE);
+#endif
+
+#endif
+#endif
 		//------------------------------
 		//----------AccSumVect test --------
 		//------------------------------
@@ -535,7 +572,9 @@ for(i_n=NB_N_MIN;i_n<NB_N*NB_N_STRIDE+NB_N_MIN;i_n+=NB_N_STRIDE)
 	#ifdef ACCSUMPAR	
 		if (VERBOSE_TEST>0) printf("   accsumPar=%.17f\n",R13);
 	#endif	
-		
+	#ifdef PARACHUNKACC
+		if (VERBOSE_TEST>0) printf("   ParaChunkAcc=%.17f\n",R14);
+	#endif		
 
 #endif
 		if (VERBOSE_TEST>0) printf("\n\n");

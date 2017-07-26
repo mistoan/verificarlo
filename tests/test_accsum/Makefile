@@ -9,7 +9,7 @@ ICC=icc
 ICC_OPT=-O3 -mp1
 ICC_I= -I ./src -I /usr/include/ -I ./
 ICC_L=
-ICC_FLAG=
+ICC_FLAG= -g
 
 GCC=gcc
 GCC_OPT= -O3 -march=core2 -fno-inline -funroll-all-loops -fopenmp
@@ -19,7 +19,7 @@ GCC_OPT= -O3 -march=core2 -fno-inline -funroll-all-loops -fopenmp
 #If needed suppress this to option and reactivate line in "all" rule
 GCC_I= -I ./src/ -I /usr/include/ -I ./
 GCC_L= -fopenmp -lm -fno-inline
-GCC_FLAG=-Wall -std=c99
+GCC_FLAG=-g -Wall -std=c99
 
 LLVM=clang
 LLVM_OPT=-O3
@@ -46,7 +46,8 @@ BIN_REP=./bin
 PRG_SRC_in=accSum.c accSumVect.c accSumPar.c DDsum.c dp_tools.c\
   FastAccSum.c FastAccSumb.c FastAccSumOpt_unroll4.c FastAccSumOpt_unroll3.c\
   FastAccSum_outlined_loops.c FastAccSumOpt_unroll2_outlined_loops.c\
-  FastAccSumOpt_unroll2.c genSum_fromFile.c gensum.c main.c sum2.c
+  FastAccSumOpt_unroll2.c genSum_fromFile.c gensum.c main.c sum2.c\
+  ParaChunkAcc.c
 
 PRG_OBJ_in=$(patsubst %.c,%.o,$(PRG_SRC_in))
 EXEC_NAME_in_icc=TestSum_icc
