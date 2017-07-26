@@ -2,6 +2,8 @@
 
 verificarlo test.c -o test --function=f
 
+
+export VERIFICARLO_BACKEND=QUAD
 export VERIFICARLO_PRECISION=40
 
 ./test > outputf1 2> outputg1

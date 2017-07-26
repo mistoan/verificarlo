@@ -23,6 +23,15 @@ Check() {
         else 
 	    echo "ok for precision $PREC"
         fi
+
+	export VERIFICARLO_BACKEND="RDROUND"
+        ./test > out_RDROUND.orig
+        cat out_RDROUND.orig | grep 'TEST>' | cut -d'>' -f 2 > out_RDROUND1
+	echo "Checking RDROUND against himself"
+	./test > out_RDROUND.orig
+	cat out_RDROUND.orig | grep 'TEST>' | cut -d'>' -f 2 > out_RDROUND2
+
+	./check_rdround.py	
     done
 }
 

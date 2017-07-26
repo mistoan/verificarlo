@@ -34,6 +34,7 @@
 // 2015-16-11 New version using double precision for single precision operation
 //
 // 2016-07-14 start the new random rounding backend for x86_64 architecture
+// 2017-26-07 restart debugging
 
 #include <math.h>
 #include <stdio.h>
@@ -103,6 +104,9 @@ static double _mca_rand(void) {
 
 static bool set_random_rounding() {
 
+// TODO tiny MT is generating a stream of random bit, use it all not 1 over 64, which is a waste and incorrect usage
+
+
 //	if (MCALIB_OP_TYPE == MCAMODE_IEEE) {
 //		fprintf(stderr, "IEEE is not a valid mode for random rounding\n");
 //	}
@@ -168,6 +172,7 @@ static inline float _mca_sbin(float a, float b,const int  sop) {
     }else{
     	 perform_bin_op_minus_inf(sop, res, a, b);
     }
+    printf("%g , %g, %g", a, b, res );
     return res;
 }
 
@@ -180,6 +185,7 @@ static inline double _mca_dbin(double a, double b, const int dop) {
     }else{
     	 perform_bin_op_minus_inf(dop, res, a, b);
     }
+    printf("%g , %g, %g", a, b, res );
     return res;
 
 }
