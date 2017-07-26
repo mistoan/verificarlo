@@ -64,7 +64,8 @@ for(i=0;i<NB_ACCUMULATOR;i++){
 	Acc[i]=0;
 }
 
-if(n>CHUNK_SIZE)
+
+if(n>=CHUNK_SIZE)
   for(i=0,j=0; i<n ;i+=CHUNK_SIZE, j=(j+1)%NB_ACCUMULATOR)
 	Acc[j]=ACCUMULATE_ALG(&p[i], CHUNK_SIZE);
 	//for(k=0; k<CHUNK_SIZE; k++)
@@ -74,14 +75,13 @@ if(n>CHUNK_SIZE)
   tail_size=n%CHUNK_SIZE;
   //j has been updated and point to the correct accumulator
 
-  Acc[j]=ACCUMULATE_ALG(&p[n-tail_size], tail_size);
+  Acc[j]+=ACCUMULATE_ALG(&p[n-tail_size], tail_size);
 
- // for(i=0;i<NB_ACCUMULATOR;i++){
- //       printf("acc[%d]=%g",i,Acc[i]);
- // }
 
   res=REDUCT_ALG(Acc, NB_ACCUMULATOR);
-
+  
+  free(Acc);
+  
   return res;
 }
 
