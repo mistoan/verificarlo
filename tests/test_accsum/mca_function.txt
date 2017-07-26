@@ -12,4 +12,5 @@ FastAccSumOpt_unroll3_In
 Sum2
 DDSum
 DDSumBis
+NaiveSumIn
 

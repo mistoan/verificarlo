@@ -55,40 +55,57 @@ int main(int argc, char *argv[])
 			double tmp_res=-1010101;
 
                         Test_macro_WarmUp(AccSumIn,SIZE,tmp_res);
-                        printf("   AccSum=%.17f\n",tmp_res);
+                        printf("=>AccSum=%.17f\n",tmp_res);
+
+			tmp_res=-1010101;
+                        Test_macro_WarmUp(NaiveSumIn,SIZE,tmp_res);
+                        printf("=>NaiveSum=%.17f\n",tmp_res);
 			
 			set_NB_ACCUMULATOR(16);
+			set_CHUNK_SIZE(100);
                         set_ACCUMULATE_ALG(AccSumIn);
                         set_REDUCT_ALG(AccSumIn);
                 	Test_macro_WarmUp(ParaChunkAccIn,SIZE,tmp_res);
-			printf("   ParaChunkAcc_AccSum=%.17f\n",tmp_res);
-/*			
-			tmp_res=-1010101;
-			set_NB_ACCUMULATOR(100);
-			Test_macro_WarmUp(ParaChunkAccIn,SIZE,tmp_res);
-			printf("   ParaChunkAcc_AccSum_100_Acc=%.17f\n",tmp_res); 
-*/
-			tmp_res=-1010101;
-			Test_macro_WarmUp(NaiveSumIn,SIZE,tmp_res);
-			printf("   NaiveSum=%.17f\n",tmp_res);
-/*			
-
+			printf("=>ParaChunkAcc_AccSum=%.17f\n",tmp_res);
+			
 			tmp_res=-1010101;
 			set_NB_ACCUMULATOR(16);
+			set_CHUNK_SIZE(100);
 			set_ACCUMULATE_ALG(NaiveSumIn);
 			set_REDUCT_ALG(NaiveSumIn);
 		
 			Test_macro_WarmUp(ParaChunkAccIn,SIZE,tmp_res);
 			printf("   ParaChunkAcc_NaiveSum=%.17f\n",tmp_res);
-*/
+
+
 			tmp_res=-1010101;
-			set_NB_ACCUMULATOR(1);
+                        set_NB_ACCUMULATOR(128);
+			set_CHUNK_SIZE(100);
+                        set_ACCUMULATE_ALG(NaiveSumIn);
+                        set_REDUCT_ALG(NaiveSumIn);
+                
+                        Test_macro_WarmUp(ParaChunkAccIn,SIZE,tmp_res);
+                        printf("   ParaChunkAcc_NaiveSum=%.17f\n",tmp_res);
+
+
+			tmp_res=-1010101;
+			set_NB_ACCUMULATOR(2);
 			set_CHUNK_SIZE(1000);
                         set_ACCUMULATE_ALG(NaiveSumIn);
                         set_REDUCT_ALG(NaiveSumIn);
 
                         Test_macro_WarmUp(ParaChunkAccIn,SIZE,tmp_res);
-                        printf("   ParaChunkAcc_NaiveSum=%.17f\n",tmp_res);
+                        printf("=>ParaChunkAcc_NaiveSum=%.17f\n",tmp_res);
+
+			tmp_res=-1010101;
+                        set_NB_ACCUMULATOR(4);
+                        set_CHUNK_SIZE(500);
+                        set_ACCUMULATE_ALG(NaiveSumIn);
+                        set_REDUCT_ALG(NaiveSumIn);
+
+                        Test_macro_WarmUp(ParaChunkAccIn,SIZE,tmp_res);
+                        printf("=>ParaChunkAcc_NaiveSum=%.17f\n",tmp_res);
+
 			
 			free(Pinit);
 		}//end cond loop

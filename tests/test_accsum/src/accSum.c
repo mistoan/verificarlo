@@ -72,7 +72,9 @@ double GAccSumIn(double *p, unsigned int n) {
 	double mu, Ms, sigma, phi, factor;
 	double q, t, tau, tau1, tau2;
 	int i;
-	
+
+	if (n==0) return 0;
+		
 	mu = fabs(p[0]);
 	for(i=1; i<n; i++) { if( fabs(p[i]) > mu ) mu = fabs(p[i]); }
 	if(mu == 0.0) return(0.0);

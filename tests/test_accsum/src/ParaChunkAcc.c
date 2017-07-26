@@ -66,7 +66,7 @@ for(i=0;i<NB_ACCUMULATOR;i++){
 
 
 if(n>=CHUNK_SIZE)
-  for(i=0,j=0; i<n ;i+=CHUNK_SIZE, j=(j+1)%NB_ACCUMULATOR)
+  for(i=0,j=0; i+CHUNK_SIZE<n ;i+=CHUNK_SIZE, j=(j+1)%NB_ACCUMULATOR)
 	Acc[j]=ACCUMULATE_ALG(&p[i], CHUNK_SIZE);
 	//for(k=0; k<CHUNK_SIZE; k++)
 	//	Acc[j]+=p[i+k];
