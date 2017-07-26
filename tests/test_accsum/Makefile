@@ -46,29 +46,64 @@ BIN_REP=./bin
 PRG_SRC_in=accSum.c accSumVect.c accSumPar.c DDsum.c dp_tools.c\
   FastAccSum.c FastAccSumb.c FastAccSumOpt_unroll4.c FastAccSumOpt_unroll3.c\
   FastAccSum_outlined_loops.c FastAccSumOpt_unroll2_outlined_loops.c\
-  FastAccSumOpt_unroll2.c genSum_fromFile.c gensum.c main.c sum2.c\
+  FastAccSumOpt_unroll2.c genSum_fromFile.c gensum.c  sum2.c\
   ParaChunkAcc.c
+PRG_MAIN_in=main.c
+PARACHUNKACC_PRG_MAIN_in=main_parachunk_acc_single_test.c 
 
 PRG_OBJ_in=$(patsubst %.c,%.o,$(PRG_SRC_in))
+PRG_MAIN_OBJ_in=$(patsubst %.c,%.o,$(PRG_MAIN_in))
+PARACHUNKACC_PRG_MAIN_OBJ_in=$(patsubst %.c,%.o,$(PARACHUNKACC_PRG_MAIN_in))
+
 EXEC_NAME_in_icc=TestSum_icc
 EXEC_NAME_in_gcc=TestSum_gcc
 EXEC_NAME_in_llvm=TestSum_llvm
 EXEC_NAME_in_VERIFICARLO=TestSum_verificarlo
+
+PARACHUNKACC_EXEC_NAME_in_icc=PARACHUNKACC_icc
+PARACHUNKACC_EXEC_NAME_in_gcc=PARACHUNKACC_gcc
+PARACHUNKACC_EXEC_NAME_in_llvm=PARACHUNKACC_llvm
+PARACHUNKACC_EXEC_NAME_in_VERIFICARLO=PARACHUNKACC_verificarlo
+
 GEN_SRC_in=dp_tools.c accSum.c gensum.c onlyGen.c
 Gen_OBJ_in=$(patsubst %.c,%.o,$(GEN_SRC_in))
 GEN_NAME_in=GenSum
 
 PRG_SRC=$(patsubst %,$(SRC_REP)/%,$(PRG_SRC_in))
+PRG_MAIN=$(patsubst %,$(SRC_REP)/%,$(PRG_MAIN_in))
+PARACHUNKACC_PRG_MAIN=$(patsubst %,$(SRC_REP)/%,$(PARACHUNKACC_PRG_MAIN_in))
+
 PRG_OBJ_icc=$(patsubst %,$(OBJ_REP_icc)/%,$(PRG_OBJ_in))
+PRG_MAIN_OBJ_icc=$(patsubst %,$(OBJ_REP_icc)/%,$(PRG_MAIN_OBJ_in))
+PARACHUNKACC_PRG_MAIN_OBJ_icc=$(patsubst %,$(OBJ_REP_icc)/%,$(PARACHUNKACC_PRG_MAIN_OBJ_in))
+
 PRG_OBJ_gcc=$(patsubst %,$(OBJ_REP_gcc)/%,$(PRG_OBJ_in))
+PRG_MAIN_OBJ_gcc=$(patsubst %,$(OBJ_REP_gcc)/%,$(PRG_MAIN_OBJ_in))
+PARACHUNKACC_PRG_MAIN_OBJ_gcc=$(patsubst %,$(OBJ_REP_gcc)/%,$(PARACHUNKACC_PRG_MAIN_OBJ_in))
+
+
+
 PRG_OBJ_llvm=$(patsubst %,$(OBJ_REP_llvm)/%,$(PRG_OBJ_in))
+PRG_MAIN_OBJ_llvm=$(patsubst %,$(OBJ_REP_llvm)/%,$(PRG_MAIN_OBJ_in))
+PARACHUNKACC_PRG_MAIN_OBJ_llvm=$(patsubst %,$(OBJ_REP_llvm)/%,$(PARACHUNKACC_PRG_MAIN_OBJ_in))
+
+
 PRG_OBJ_VERIFICARLO=$(patsubst %,$(OBJ_REP_VERIFICARLO)/%,$(PRG_OBJ_in))
+PRG_MAIN_OBJ_VERIFICARLO=$(patsubst %,$(OBJ_REP_VERIFICARLO)/%,$(PRG_MAIN_OBJ_in))
+PARACHUNKACC_PRG_MAIN_OBJ_VERIFICARLO=$(patsubst %,$(OBJ_REP_VERIFICARLO)/%,$(PARACHUNKACC_PRG_MAIN_OBJ_in))
 
 
 EXEC_NAME_icc=$(patsubst %,$(BIN_REP)/%,$(EXEC_NAME_in_icc))
 EXEC_NAME_gcc=$(patsubst %,$(BIN_REP)/%,$(EXEC_NAME_in_gcc))
 EXEC_NAME_llvm=$(patsubst %,$(BIN_REP)/%,$(EXEC_NAME_in_llvm))
 EXEC_NAME_VERIFICARLO=$(patsubst %,$(BIN_REP)/%,$(EXEC_NAME_in_VERIFICARLO))
+
+
+PARACHUNKACC_EXEC_NAME_icc=$(patsubst %,$(BIN_REP)/%,$(PARACHUNKACC_EXEC_NAME_in_icc))
+PARACHUNKACC_EXEC_NAME_gcc=$(patsubst %,$(BIN_REP)/%,$(PARACHUNKACC_EXEC_NAME_in_gcc))
+PARACHUNKACC_EXEC_NAME_llvm=$(patsubst %,$(BIN_REP)/%,$(PARACHUNKACC_EXEC_NAME_in_llvm))
+PARACHUNKACC_EXEC_NAME_VERIFICARLO=$(patsubst %,$(BIN_REP)/%,$(PARACHUNKACC_EXEC_NAME_in_VERIFICARLO))
+
 
 GEN_SRC=$(patsubst %,$(SRC_REP)/%,$(GEN_SRC_in))
 GEN_OBJ=$(patsubst %,$(OBJ_REP)/%,$(GEN_OBJ_in))
@@ -77,33 +112,46 @@ GEN_NAME=$(patsubst %,$(BIN_REP)/%,$(GEN_NAME_in))
 ############################## all rules #############################
 
 #rule to compil the bench
-all: $(PRG_OBJ_icc) $(PRG_OBJ_gcc) $(PRG_OBJ_llvm) $(PRG_OBJ_VERIFICARLO)
+all: \
+$(PRG_OBJ_icc) $(PRG_MAIN_OBJ_icc) $(PARACHUNKACC_PRG_MAIN_OBJ_icc) \
+$(PRG_OBJ_gcc) $(PRG_MAIN_OBJ_gcc) $(PARACHUNKACC_PRG_MAIN_OBJ_gcc) \
+$(PRG_OBJ_llvm) $(PRG_MAIN_OBJ_llvm) $(PARACHUNKACC_PRG_MAIN_OBJ_llvm)\
+$(PRG_OBJ_VERIFICARLO) $(PRG_MAIN_OBJ_VERIFICARLO) $(PARACHUNKACC_PRG_MAIN_OBJ_VERIFICARLO)
 	-mkdir -p $(BIN_REP)
-	$(ICC)   $(ICC_L) -o $(EXEC_NAME_icc)  $(PRG_OBJ_icc)
-	$(GCC)    $(GCC_L) -o $(EXEC_NAME_gcc)  $(PRG_OBJ_gcc) -lm
-	$(LLVM)    $(LLVM_L) -o $(EXEC_NAME_llvm)  $(PRG_OBJ_llvm) -lm
-	$(VERIFICARLO)    $(VERIFICARLO_L) -o $(EXEC_NAME_VERIFICARLO)  $(PRG_OBJ_VERIFICARLO) -lm 
+	$(ICC)   $(ICC_L) -o $(EXEC_NAME_icc)  $(PRG_OBJ_icc) $(PRG_MAIN_OBJ_icc)
+	$(GCC)    $(GCC_L) -o $(EXEC_NAME_gcc)  $(PRG_OBJ_gcc) $(PRG_MAIN_OBJ_gcc) -lm
+	$(LLVM)    $(LLVM_L) -o $(EXEC_NAME_llvm)  $(PRG_OBJ_llvm) $(PRG_MAIN_OBJ_llvm) -lm
+	$(VERIFICARLO)    $(VERIFICARLO_L) -o $(EXEC_NAME_VERIFICARLO)  $(PRG_OBJ_VERIFICARLO) $(PRG_MAIN_OBJ_VERIFICARLO) -lm 
+	$(ICC)   $(ICC_L) -o $(PARACHUNKACC_EXEC_NAME_icc)  $(PRG_OBJ_icc) $(PARACHUNKACC_PRG_MAIN_OBJ_icc)
+	$(GCC)    $(GCC_L) -o $(PARACHUNKACC_EXEC_NAME_gcc)  $(PRG_OBJ_gcc) $(PARACHUNKACC_PRG_MAIN_OBJ_gcc)  -lm
+	$(LLVM)    $(LLVM_L) -o $(PARACHUNKACC_EXEC_NAME_llvm)  $(PRG_OBJ_llvm) $(PARACHUNKACC_PRG_MAIN_OBJ_llvm) -lm
+	$(VERIFICARLO)    $(VERIFICARLO_L) -o $(EXEC_NAME_VERIFICARLO)  $(PRG_OBJ_VERIFICARLO) $(PARACHUNKACC_PRG_MAIN_OBJ_VERIFICARLO) -lm
 
 #build only ICC version
-all_icc: $(PRG_OBJ_icc)
+all_icc: $(PRG_OBJ_icc) $(PRG_MAIN_OBJ_icc) $(PARACHUNKACC_PRG_MAIN_OBJ_icc) 
 	-mkdir -p $(BIN_REP)
-	$(ICC)   $(ICC_L) -o $(EXEC_NAME_icc)  $(PRG_OBJ_icc)
+	$(ICC)   $(ICC_L) -o $(EXEC_NAME_icc)  $(PRG_OBJ_icc) $(PRG_MAIN_OBJ_icc)
+	$(ICC)   $(ICC_L) -o $(PARACHUNKACC_EXEC_NAME_icc)  $(PRG_OBJ_icc) $(PARACHUNKACC_PRG_MAIN_OBJ_icc)
 
 #build only gcc version
-all_gcc:  $(PRG_OBJ_gcc)
+all_gcc:  $(PRG_OBJ_gcc) $(PRG_MAIN_OBJ_gcc) $(PARACHUNKACC_PRG_MAIN_OBJ_gcc)
 	-mkdir -p $(BIN_REP)
-	$(GCC)   $(GCC_L) -o $(EXEC_NAME_gcc)  $(PRG_OBJ_gcc) -lm
+	 $(GCC)    $(GCC_L) -o $(EXEC_NAME_gcc)  $(PRG_OBJ_gcc) $(PRG_MAIN_OBJ_gcc) -lm
+	$(GCC)    $(GCC_L) -o $(PARACHUNKACC_EXEC_NAME_gcc)  $(PRG_OBJ_gcc) $(PARACHUNKACC_PRG_MAIN_OBJ_gcc)  -lm
 #TODO: find a cleaner way to add -lm in the end, it does not work if -lm is at the begining in the linker flags...
 
 #build only LLVM version
-all_llvm: $(PRG_OBJ_llvm)
+all_llvm: $(PRG_OBJ_llvm) $(PRG_OBJ_llvm) $(PRG_MAIN_OBJ_llvm) $(PARACHUNKACC_PRG_MAIN_OBJ_llvm)
 	-mkdir -p $(BIN_REP)
-	$(LLVM)   $(LLVM_L) -o $(EXEC_NAME_llvm)  $(PRG_OBJ_llvm) -lm
+	$(LLVM)   $(LLVM_L) -o $(EXEC_NAME_llvm)  $(PRG_OBJ_llvm)$(PRG_MAIN_OBJ_llvm) -lm
+	$(LLVM)    $(LLVM_L) -o $(PARACHUNKACC_EXEC_NAME_llvm)  $(PRG_OBJ_llvm) $(PARACHUNKACC_PRG_MAIN_OBJ_llvm) -lm
+	
 
 #build only VERIFICARLO version
-all_verificarlo: $(PRG_OBJ_VERIFICARLO)
+all_verificarlo: $(PRG_OBJ_VERIFICARLO) $(PRG_MAIN_OBJ_VERIFICARLO) $(PARACHUNKACC_PRG_MAIN_OBJ_VERIFICARLO)
 	-mkdir -p $(BIN_REP)
-	$(VERIFICARLO)   $(VERIFICARLO_L) -o $(EXEC_NAME_VERIFICARLO)  $(PRG_OBJ_VERIFICARLO) -lm
+	$(VERIFICARLO)   $(VERIFICARLO_L) -o $(EXEC_NAME_VERIFICARLO)  $(PRG_OBJ_VERIFICARLO) $(PRG_MAIN_OBJ_VERIFICARLO) -lm
+	$(VERIFICARLO)    $(VERIFICARLO_L) -o $(EXEC_NAME_VERIFICARLO)  $(PRG_OBJ_VERIFICARLO) $(PARACHUNKACC_PRG_MAIN_OBJ_VERIFICARLO) -lm
 
 
 
