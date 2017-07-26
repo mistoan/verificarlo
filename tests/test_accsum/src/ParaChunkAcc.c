@@ -3,19 +3,32 @@
 //## Mail eric.petit@intel.com
 //#######################################
 
-//rd robin accumulator usage is fair since the input vector are unformly randomly generated
-// CHUNK_SIZE: the vector to sum are split in chunk of CHUNK_SIZE
-#define CHUNK_SIZE 100
-// NB_ACCUMULATOR: the number of intermediate accumulator collecting the sum; in a parallel implementation it correspond to each thread local result.
-#define NB_ACCUMULATOR 16
-// ACCUMULATE_ALG: the algorithm used to do the accumulation in all chunks
-#define ACCUMULATE_ALG AccSumIn
-// REDUCT_ALG: the reduction algorithm used to sum the accumulator contribution to the final sum
-#define REDUCT_ALG AccSumIn
-
-
 #include "all_header.h"
 
+//rd robin accumulator usage is fair since the input vector are unformly randomly generated
+// CHUNK_SIZE: the vector to sum are split in chunk of CHUNK_SIZE
+unsigned int CHUNK_SIZE=100;
+// NB_ACCUMULATOR: the number of intermediate accumulator collecting the sum; in a parallel implementation it correspond to each thread local result.
+unsigned int NB_ACCUMULATOR=16;
+// ACCUMULATE_ALG: the algorithm used to do the accumulation in all chunks
+double (*ACCUMULATE_ALG)(double*, unsigned int)=AccSumIn;
+// REDUCT_ALG: the reduction algorithm used to sum the accumulator contribution to the final sum
+double (*REDUCT_ALG)(double*, unsigned int)=AccSumIn;
+
+
+
+int set_ACCUMULATE_ALG(double (*f_pointer)(double*, unsigned int)){
+return 0;
+}
+int set_REDUCT_ALG(double (*f_pointer)(double*, unsigned int)){
+return 0;
+}
+int set_NB_ACCUMULATOR(int nb_acc){
+return 0;
+}
+int set_CHUNK_SIZE(int chunck_size){
+return 0;
+}
 
 double ParaChunkAccIn(double*, unsigned int );
 
@@ -31,9 +44,17 @@ double ParaChunkAcc(double *p, unsigned int n) {
 
  
 double ParaChunkAccIn(double *p, unsigned int n) {
-  double res=0, Acc[NB_ACCUMULATOR]={0};
-  int i=0, j=0, k=0;
+  assert(NB_ACCUMULATOR>=1);
+
+  double res=0;
+  double *Acc=(double *)malloc(NB_ACCUMULATOR*sizeof(double));
+  
+  int i=0, j=0;//, k=0;
   unsigned int tail_size=0;
+
+for(i=0;i<NB_ACCUMULATOR;i++){
+	Acc[i]=0;
+}
 
 if(n>CHUNK_SIZE)
   for(i=0,j=0; i<n ;i+=CHUNK_SIZE, j=(j+1)%NB_ACCUMULATOR)
