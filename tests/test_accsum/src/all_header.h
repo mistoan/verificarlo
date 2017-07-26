@@ -33,6 +33,8 @@ double AccSumIn(double *, unsigned int );
 double AccSumVectIn(double *, unsigned int );
 double AccSumParIn(double *, unsigned int );
 double GAccSumIn(double *, unsigned int );
+double NaiveSumIn(double *, unsigned int );
+double NaiveSum(double *, unsigned int );
 double AccSum(double *, unsigned int );
 double GAccSum(double *, unsigned int );
 double ParaChunkAcc(double *, unsigned int );

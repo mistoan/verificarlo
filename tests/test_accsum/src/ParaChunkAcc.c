@@ -18,16 +18,22 @@ double (*REDUCT_ALG)(double*, unsigned int)=AccSumIn;
 
 
 int set_ACCUMULATE_ALG(double (*f_pointer)(double*, unsigned int)){
-return 0;
+	ACCUMULATE_ALG=f_pointer;
+	return 0;
 }
+
 int set_REDUCT_ALG(double (*f_pointer)(double*, unsigned int)){
-return 0;
+	REDUCT_ALG=f_pointer;
+	return 0;
 }
-int set_NB_ACCUMULATOR(int nb_acc){
-return 0;
+
+int set_NB_ACCUMULATOR(unsigned int nb_acc){
+	NB_ACCUMULATOR=nb_acc;
+	return 0;
 }
-int set_CHUNK_SIZE(int chunck_size){
-return 0;
+int set_CHUNK_SIZE(unsigned int chunck_size){
+	CHUNK_SIZE=chunck_size;
+	return 0;
 }
 
 double ParaChunkAccIn(double*, unsigned int );
@@ -52,6 +58,8 @@ double ParaChunkAccIn(double *p, unsigned int n) {
   int i=0, j=0;//, k=0;
   unsigned int tail_size=0;
 
+printf("setup:\nNB_ACCUMULATOR=%d\nCHUNK_SIZE=%d\nRALG=%x\nACCALG=%x\n",NB_ACCUMULATOR,CHUNK_SIZE,REDUCT_ALG,ACCUMULATE_ALG) ; 
+
 for(i=0;i<NB_ACCUMULATOR;i++){
 	Acc[i]=0;
 }
@@ -62,10 +70,15 @@ if(n>CHUNK_SIZE)
 	//for(k=0; k<CHUNK_SIZE; k++)
 	//	Acc[j]+=p[i+k];
 
+
   tail_size=n%CHUNK_SIZE;
   //j has been updated and point to the correct accumulator
 
   Acc[j]=ACCUMULATE_ALG(&p[n-tail_size], tail_size);
+
+ // for(i=0;i<NB_ACCUMULATOR;i++){
+ //       printf("acc[%d]=%g",i,Acc[i]);
+ // }
 
   res=REDUCT_ALG(Acc, NB_ACCUMULATOR);
 

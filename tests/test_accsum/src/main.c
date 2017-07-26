@@ -72,8 +72,8 @@ int main(int argc, char *argv[])
 	file3D=fopen(filename,"w+");
 	
 #endif	
-assert(NB_N*NB_N_STRIDE+NB_N_MIN<=NB_MAX_N);	
-for(i_n=NB_N_MIN;i_n<NB_N*NB_N_STRIDE+NB_N_MIN;i_n+=NB_N_STRIDE)
+assert((NB_N-1)*NB_N_STRIDE+NB_N_MIN<=NB_MAX_N);	
+for(i_n=NB_N_MIN;i_n<(NB_N)*NB_N_STRIDE+NB_N_MIN;i_n+=NB_N_STRIDE)
 	{	
 	SIZE=N[i_n];
 	

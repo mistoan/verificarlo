@@ -47,7 +47,7 @@ PRG_SRC_in=accSum.c accSumVect.c accSumPar.c DDsum.c dp_tools.c\
   FastAccSum.c FastAccSumb.c FastAccSumOpt_unroll4.c FastAccSumOpt_unroll3.c\
   FastAccSum_outlined_loops.c FastAccSumOpt_unroll2_outlined_loops.c\
   FastAccSumOpt_unroll2.c genSum_fromFile.c gensum.c  sum2.c\
-  ParaChunkAcc.c
+  ParaChunkAcc.c naiveSum.c
 PRG_MAIN_in=main.c
 PARACHUNKACC_PRG_MAIN_in=main_parachunk_acc_single_test.c 
 
