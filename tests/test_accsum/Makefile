@@ -12,31 +12,35 @@ ICC_L=
 ICC_FLAG= -g
 
 GCC=gcc
-GCC_OPT= -O3 -march=core2 -fno-inline -funroll-all-loops -fopenmp
+GCC_OPT= -O3 -march=native -fno-inline -funroll-all-loops 
 #-mstringop-strategy=loop only for complient gcc version
 #-fopenmp option should appear only for open mp version
 #unroll all loops interfer with hand unrolling
 #If needed suppress this to option and reactivate line in "all" rule
 GCC_I= -I ./src/ -I /usr/include/ -I ./
-GCC_L= -fopenmp -lm -fno-inline
+GCC_L= -lm -fno-inline
 GCC_FLAG=-g -Wall -std=c99
 
 LLVM=clang
 LLVM_OPT=-O3
 LLVM_I= -I ./src -I /usr/include/ -I ./
-LLVM_L= -fopenmp -lm -fno-inline
+LLVM_L=  -lm -fno-inline
 LLVM_FLAG=
 
 VERIFICARLO=verificarlo
 VERIFICARLO_OPT=-O3
 VERIFICARLO_I= -I ./src -I /usr/include/ -I ./
-VERIFICARLO_L= -fopenmp -lm -fno-inline
+VERIFICARLO_L=  -lm -fno-inline
 VERIFICARLO_FLAG= --verbose --functions-file mca_function.txt 
 
-
+CC_I=-I ./src -I /usr/include/ -I ./
+CC_FLAG= -g
+CC_L= -lm
+CC_OPT= -O2
 
 
 SRC_REP=./src
+OBJ_REP=./obj
 OBJ_REP_icc=./obj_icc
 OBJ_REP_gcc=./obj_gcc
 OBJ_REP_llvm=./obj_llvm
@@ -66,7 +70,7 @@ PARACHUNKACC_EXEC_NAME_in_llvm=PARACHUNKACC_llvm
 PARACHUNKACC_EXEC_NAME_in_VERIFICARLO=PARACHUNKACC_verificarlo
 
 GEN_SRC_in=dp_tools.c accSum.c gensum.c onlyGen.c
-Gen_OBJ_in=$(patsubst %.c,%.o,$(GEN_SRC_in))
+GEN_OBJ_in=$(patsubst %.c,%.o,$(GEN_SRC_in))
 GEN_NAME_in=GenSum
 
 PRG_SRC=$(patsubst %,$(SRC_REP)/%,$(PRG_SRC_in))
@@ -160,9 +164,16 @@ all_verificarlo: $(PRG_OBJ_VERIFICARLO) $(PRG_MAIN_OBJ_VERIFICARLO) $(PARACHUNKA
 
 #rule to compile the input data generator
 all_gen: $(GEN_OBJ)
-	$(CC)   $(CC_L) -o $(GEN_NAME)  $(GEN_OBJ)
+	$(CC)   $(CC_OPT) $(CC_FLAG) -o $(GEN_NAME)  $(GEN_OBJ) $(CC_L) 
+
+$(OBJ_REP)/%.o: $(SRC_REP)/%.c bench.conf
+	-mkdir -p $(OBJ_REP)
+	$(CC) $(CC_L) $(CC_OPT) $(CC_FLAG) $(CC_I)  -c $< -o $@
+
 
 ######################### secondary rules for object generation #####################
+
+
 
 #build icc object
 $(OBJ_REP_icc)/%.o: $(SRC_REP)/%.c bench.conf

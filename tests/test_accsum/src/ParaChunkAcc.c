@@ -5,17 +5,21 @@
 
 #include "all_header.h"
 
-//rd robin accumulator usage is fair since the input vector are unformly randomly generated
+
 // CHUNK_SIZE: the vector to sum are split in chunk of CHUNK_SIZE
 unsigned int CHUNK_SIZE=100;
 // NB_ACCUMULATOR: the number of intermediate accumulator collecting the sum; in a parallel implementation it correspond to each thread local result.
 unsigned int NB_ACCUMULATOR=16;
 // ACCUMULATE_ALG: the algorithm used to do the accumulation in all chunks
-double (*ACCUMULATE_ALG)(double*, unsigned int)=AccSumIn;
-// REDUCT_ALG: the reduction algorithm used to sum the accumulator contribution to the final sum
-double (*REDUCT_ALG)(double*, unsigned int)=AccSumIn;
+double (*ACCUMULATE_ALG)(double*, unsigned int)=NaiveSumIn;
+// REDUCT_ALG: the reduction algorithm used to sum the accumulator contribution to the final su
+double (*REDUCT_ALG)(double*, unsigned int)=NaiveSumIn;
 
 
+
+
+
+//rd robin accumulator usage is fair since the input vector are unformly randomly generated
 
 int set_ACCUMULATE_ALG(double (*f_pointer)(double*, unsigned int)){
 	ACCUMULATE_ALG=f_pointer;
@@ -58,7 +62,6 @@ double ParaChunkAccIn(double *p, unsigned int n) {
   int i=0, j=0;//, k=0;
   unsigned int tail_size=0;
 
-printf("setup:\nNB_ACCUMULATOR=%d\nCHUNK_SIZE=%d\nRALG=%x\nACCALG=%x\n",NB_ACCUMULATOR,CHUNK_SIZE,REDUCT_ALG,ACCUMULATE_ALG) ; 
 
 for(i=0;i<NB_ACCUMULATOR;i++){
 	Acc[i]=0;
@@ -67,7 +70,7 @@ for(i=0;i<NB_ACCUMULATOR;i++){
 
 if(n>=CHUNK_SIZE)
   for(i=0,j=0; i+CHUNK_SIZE<n ;i+=CHUNK_SIZE, j=(j+1)%NB_ACCUMULATOR)
-	Acc[j]=ACCUMULATE_ALG(&p[i], CHUNK_SIZE);
+	Acc[j]+=ACCUMULATE_ALG(&p[i], CHUNK_SIZE);
 	//for(k=0; k<CHUNK_SIZE; k++)
 	//	Acc[j]+=p[i+k];
 

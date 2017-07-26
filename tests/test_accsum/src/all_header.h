@@ -41,9 +41,21 @@ double ParaChunkAcc(double *, unsigned int );
 
 
 
-#ifdef PARACHUNKACC
+//#ifdef PARACHUNKACC
 double ParaChunkAccIn(double *, unsigned int );
-#endif
+// CHUNK_SIZE: the vector to sum are split in chunk of CHUNK_SIZE
+extern unsigned int CHUNK_SIZE;
+// NB_ACCUMULATOR: the number of intermediate accumulator collecting the sum; in a parallel implementation it correspond to each thread local result.
+extern unsigned int NB_ACCUMULATOR;
+// ACCUMULATE_ALG: the algorithm used to do the accumulation in all chunks
+extern double (*ACCUMULATE_ALG)(double*, unsigned int);
+// REDUCT_ALG: the reduction algorithm used to sum the accumulator contribution to the final sum
+extern double (*REDUCT_ALG)(double*, unsigned int);
+
+
+
+//#endif
+
 #ifdef FASTACCSUM
 double FastAccSumIn(double *, unsigned int );
 #endif
