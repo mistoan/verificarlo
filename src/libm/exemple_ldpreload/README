@@ -1,0 +1,4 @@
+#!/bin/sh
+gcc main.c -o prog -lm
+gcc -shared -fPIC  fake_libc.c -o libfake.so -ldl
+LD_PRELOAD="$PWD/libfake.so" ./prog
