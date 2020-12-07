@@ -57,6 +57,7 @@ typedef enum {
   KEY_RANGE_B32,
   KEY_RANGE_B64,
   KEY_ERR_EXP,
+  KEY_ERR_FILE,
   KEY_INPUT_FILE,
   KEY_OUTPUT_FILE,
   KEY_LOG_FILE,
@@ -77,6 +78,7 @@ static const char key_log_file_str[] = "prec-log-file";
 static const char key_mode_str[] = "mode";
 static const char key_err_mode_str[] = "error-mode";
 static const char key_err_exp_str[] = "max-abs-error-exponent";
+static const char key_err_file_str[] = "abs-error-exponent-file";
 static const char key_instrument_str[] = "instrument";
 static const char key_daz_str[] = "daz";
 static const char key_ftz_str[] = "ftz";
@@ -109,6 +111,12 @@ typedef enum {
 } vprec_err_mode;
 
 static const char *VPREC_ERR_MODE_STR[] = {"rel", "abs", "all"};
+
+static const char *vprec_absErr_file = NULL;
+
+vfc_hashmap_t _vprec_absErr_map;
+
+void *_vprec_current_ret_addr = NULL;
 
 /* define the possible VPREC operation */
 typedef enum {
@@ -271,6 +279,10 @@ void _set_vprec_inst_mode(vprec_inst_mode mode) {
   }
 }
 
+void _set_vprec_absErr_file(const char *err_file) {
+  vprec_absErr_file = err_file;
+}
+
 /******************** VPREC HELPER FUNCTIONS *******************
  * The following functions are used to set virtual precision,
  * VPREC mode of operation and instrumentation mode.
@@ -402,9 +414,24 @@ inline double handle_binary64_normal_absErr(double a, int64_t aexp,
   return retVal;
 }
 
+void _vprec_read_absErr_hashmap(FILE *fin) {
+  int newAbsErr;
+  void* callRetAddr;
+
+  if (fin != NULL) {
+    while (fscanf(fin, "%p\t%d\n", &callRetAddr, &newAbsErr) == 2) {
+      // insert in the hashmap
+      vfc_hashmap_insert(_vprec_absErr_map, (size_t)callRetAddr, (void*)(&newAbsErr));
+    }
+  }
+}
+
+#define _vprec_get_current_return_address                                      \
+  _vprec_current_ret_addr = __builtin_return_address(1);
+
 /******************** VPREC ARITHMETIC FUNCTIONS ********************
  * The following set of functions perform the VPREC operation. Operands
- * are first correctly rounded to the target precison format if inbound
+ * are first correctly rounded to the target precision format if inbound
  * is set, the operation is then perform using IEEE hw and
  * correct rounding to the target precision format is done if outbound
  * is set.
@@ -434,10 +461,20 @@ inline double handle_binary64_normal_absErr(double a, int64_t aexp,
 static float _vprec_round_binary32(float a, char is_input, void *context,
                                    int binary32_range, int binary32_precision) {
   t_context *currentContext = (t_context *)context;
+  int absErr_exp_local = currentContext->absErr_exp;
 
   /* test if 'a' is a special case */
   if (!isfinite(a)) {
     return a;
+  }
+
+  /* when absErr mode is active, check if the value for the exponent 
+   * can be set from file */
+  if (currentContext->absErr == true) {
+    void *newAbsErr_exp = vfc_hashmap_get(vprec_absErr_map, (size_t)_vprec_current_ret_addr);
+    if (newAbsErr_exp != NULL) {
+      absErr_exp_local = *((int *)newAbsErr_exp);
+    }
   }
 
   /* round to zero or set to infinity if underflow or overflow compared to
@@ -495,10 +532,20 @@ static double _vprec_round_binary64(double a, char is_input, void *context,
                                     int binary64_range,
                                     int binary64_precision) {
   t_context *currentContext = (t_context *)context;
+  int absErr_exp_local = currentContext->absErr_exp;
 
   /* test if 'a' is a special case */
   if (!isfinite(a)) {
     return a;
+  }
+
+  /* when absErr mode is active, check if the value for the exponent 
+   * can be set from file */
+  if (currentContext->absErr == true) {
+    void *newAbsErr_exp = vfc_hashmap_get(vprec_absErr_map, (size_t)_vprec_current_ret_addr);
+    if (newAbsErr_exp != NULL) {
+      absErr_exp_local = *((int *)newAbsErr_exp);
+    }
   }
 
   /* round to zero or set to infinity if underflow or overflow compare to
@@ -1212,38 +1259,46 @@ void _interflop_exit_function(interflop_function_stack_t *stack, void *context,
  **********************************************************************/
 
 static void _interflop_add_float(float a, float b, float *c, void *context) {
+  _vprec_get_current_return_address;
   *c = _vprec_binary32_binary_op(a, b, vprec_add, context);
 }
 
 static void _interflop_sub_float(float a, float b, float *c, void *context) {
+  _vprec_get_current_return_address;
   *c = _vprec_binary32_binary_op(a, b, vprec_sub, context);
 }
 
 static void _interflop_mul_float(float a, float b, float *c, void *context) {
+  _vprec_get_current_return_address;
   *c = _vprec_binary32_binary_op(a, b, vprec_mul, context);
 }
 
 static void _interflop_div_float(float a, float b, float *c, void *context) {
+  _vprec_get_current_return_address;
   *c = _vprec_binary32_binary_op(a, b, vprec_div, context);
 }
 
 static void _interflop_add_double(double a, double b, double *c,
                                   void *context) {
+  _vprec_get_current_return_address;
   *c = _vprec_binary64_binary_op(a, b, vprec_add, context);
 }
 
 static void _interflop_sub_double(double a, double b, double *c,
                                   void *context) {
+  _vprec_get_current_return_address;
   *c = _vprec_binary64_binary_op(a, b, vprec_sub, context);
 }
 
 static void _interflop_mul_double(double a, double b, double *c,
                                   void *context) {
+  _vprec_get_current_return_address;
   *c = _vprec_binary64_binary_op(a, b, vprec_mul, context);
 }
 
 static void _interflop_div_double(double a, double b, double *c,
                                   void *context) {
+  _vprec_get_current_return_address;
   *c = _vprec_binary64_binary_op(a, b, vprec_div, context);
 }
 
@@ -1269,6 +1324,9 @@ static struct argp_option options[] = {
      "select error mode among {rel, abs, all}", 0},
     {key_err_exp_str, KEY_ERR_EXP, "MAX_ABS_ERROR_EXPONENT", 0,
      "select magnitude of the maximum absolute error", 0},
+    {key_err_file_str, KEY_ERR_FILE, "ABS_ERROR_FILE", 0,
+     "input file with magnitudes for maximum absolute errors, per instruction",
+     0},
     {key_instrument_str, KEY_INSTRUMENT, "INSTRUMENTATION", 0,
      "select VPREC instrumentation mode among {arguments, operations, full}",
      0},
@@ -1278,6 +1336,10 @@ static struct argp_option options[] = {
      0},
     {0}};
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> started work on support for reading the magnitude of the absolute error from a configuration file
 static error_t parse_opt(int key, char *arg, struct argp_state *state) {
   t_context *ctx = (t_context *)state->input;
   char *endptr;
@@ -1401,6 +1463,10 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
                    key_err_exp_str);
     }
     break;
+  case KEY_ERR_FILE:
+    /* input file containing the maximum absolute errors, per instruction */
+    _set_vprec_absErr_file(arg);
+    break;
   case KEY_INSTRUMENT:
     /* instrumentation mode */
     if (strcasecmp(VPREC_INST_MODE_STR[vprecinst_arg], arg) == 0) {
@@ -1505,6 +1571,12 @@ void _interflop_finalize(void *context) {
 
   /* destroy vprec_function_map */
   vfc_hashmap_destroy(_vprec_func_map);
+
+  /* free vprec_absErr_map */
+  vfc_hashmap_free(_vprec_absErr_map);
+
+  /* destroy _vprec_absErr_map */
+  vfc_hashmap_destroy(_vprec_absErr_map);
 }
 
 struct interflop_backend_interface_t interflop_init(int argc, char **argv,
@@ -1515,6 +1587,9 @@ struct interflop_backend_interface_t interflop_init(int argc, char **argv,
 
   /* Initialize the vprec_function_map */
   _vprec_func_map = vfc_hashmap_create();
+
+  /* Initialize the vprec_absErr_map */
+  _vprec_absErr_map = vfc_hashmap_create();
 
   /* Setting to default values */
   _set_vprec_precision_binary32(VPREC_PRECISION_BINARY32_DEFAULT);
@@ -1540,6 +1615,17 @@ struct interflop_backend_interface_t interflop_init(int argc, char **argv,
       fclose(f);
     } else {
       logger_error("Input file can't be found");
+    }
+  }
+
+  /* read the absErr hashmap */
+  if (vprec_absErr_file != NULL) {
+    FILE *f = fopen(vprec_absErr_file, "r");
+    if (f != NULL) {
+      _vprec_read_absErr_hashmap(f);
+      fclose(f);
+    } else {
+      logger_error("Input absErr file can't be opened");
     }
   }
 
