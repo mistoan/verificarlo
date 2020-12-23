@@ -361,12 +361,13 @@ int compute_absErr_vprec_binary64(bool isDenormal, void *context, int expDiff,
 
 void _vprec_read_absErr_hashmap(FILE *fin) {
   int newAbsErr;
-  void* callRetAddr;
+  void *callRetAddr;
 
   if (fin != NULL) {
     while (fscanf(fin, "%p\t%d\n", &callRetAddr, &newAbsErr) == 2) {
       // insert in the hashmap
-      vfc_hashmap_insert(_vprec_absErr_map, (size_t)callRetAddr, (void*)(&newAbsErr));
+      vfc_hashmap_insert(_vprec_absErr_map, (size_t)callRetAddr,
+                         (void *)(&newAbsErr));
     }
   }
 }
@@ -413,10 +414,11 @@ static float _vprec_round_binary32(float a, char is_input, void *context,
     return a;
   }
 
-  /* when absErr mode is active, check if the value for the exponent 
+  /* when absErr mode is active, check if the value for the exponent
    * can be set from file */
   if (currentContext->absErr == true) {
-    void *newAbsErr_exp = vfc_hashmap_get(_vprec_absErr_map, (size_t)_vprec_current_ret_addr);
+    void *newAbsErr_exp =
+        vfc_hashmap_get(_vprec_absErr_map, (size_t)_vprec_current_ret_addr);
     if (newAbsErr_exp != NULL) {
       absErr_exp_local = *((int *)newAbsErr_exp);
     }
@@ -513,10 +515,11 @@ static double _vprec_round_binary64(double a, char is_input, void *context,
     return a;
   }
 
-  /* when absErr mode is active, check if the value for the exponent 
+  /* when absErr mode is active, check if the value for the exponent
    * can be set from file */
   if (currentContext->absErr == true) {
-    void *newAbsErr_exp = vfc_hashmap_get(_vprec_absErr_map, (size_t)_vprec_current_ret_addr);
+    void *newAbsErr_exp =
+        vfc_hashmap_get(_vprec_absErr_map, (size_t)_vprec_current_ret_addr);
     if (newAbsErr_exp != NULL) {
       absErr_exp_local = *((int *)newAbsErr_exp);
     }
@@ -1079,7 +1082,6 @@ static struct argp_option options[] = {
     {key_ftz_str, KEY_FTZ, 0, 0, "flush-to-zero: sets denormal output to zero",
      0},
     {0}};
-
 
 static error_t parse_opt(int key, char *arg, struct argp_state *state) {
   t_context *ctx = (t_context *)state->input;
