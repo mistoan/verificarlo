@@ -416,12 +416,13 @@ inline double handle_binary64_normal_absErr(double a, int64_t aexp,
 
 void _vprec_read_absErr_hashmap(FILE *fin) {
   int newAbsErr;
-  void* callRetAddr;
+  void *callRetAddr;
 
   if (fin != NULL) {
     while (fscanf(fin, "%p\t%d\n", &callRetAddr, &newAbsErr) == 2) {
       // insert in the hashmap
-      vfc_hashmap_insert(_vprec_absErr_map, (size_t)callRetAddr, (void*)(&newAbsErr));
+      vfc_hashmap_insert(_vprec_absErr_map, (size_t)callRetAddr,
+                         (void *)(&newAbsErr));
     }
   }
 }
@@ -468,10 +469,11 @@ static float _vprec_round_binary32(float a, char is_input, void *context,
     return a;
   }
 
-  /* when absErr mode is active, check if the value for the exponent 
+  /* when absErr mode is active, check if the value for the exponent
    * can be set from file */
   if (currentContext->absErr == true) {
-    void *newAbsErr_exp = vfc_hashmap_get(_vprec_absErr_map, (size_t)_vprec_current_ret_addr);
+    void *newAbsErr_exp =
+        vfc_hashmap_get(_vprec_absErr_map, (size_t)_vprec_current_ret_addr);
     if (newAbsErr_exp != NULL) {
       absErr_exp_local = *((int *)newAbsErr_exp);
     }
@@ -539,10 +541,11 @@ static double _vprec_round_binary64(double a, char is_input, void *context,
     return a;
   }
 
-  /* when absErr mode is active, check if the value for the exponent 
+  /* when absErr mode is active, check if the value for the exponent
    * can be set from file */
   if (currentContext->absErr == true) {
-    void *newAbsErr_exp = vfc_hashmap_get(_vprec_absErr_map, (size_t)_vprec_current_ret_addr);
+    void *newAbsErr_exp =
+        vfc_hashmap_get(_vprec_absErr_map, (size_t)_vprec_current_ret_addr);
     if (newAbsErr_exp != NULL) {
       absErr_exp_local = *((int *)newAbsErr_exp);
     }
@@ -1336,10 +1339,6 @@ static struct argp_option options[] = {
      0},
     {0}};
 
-<<<<<<< HEAD
-=======
-
->>>>>>> started work on support for reading the magnitude of the absolute error from a configuration file
 static error_t parse_opt(int key, char *arg, struct argp_state *state) {
   t_context *ctx = (t_context *)state->input;
   char *endptr;
