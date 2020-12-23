@@ -427,7 +427,7 @@ void _vprec_read_absErr_hashmap(FILE *fin) {
   }
 }
 
-#define _vprec_get_current_return_address                                      \
+#define _vprec_get_current_return_address()                                    \
   _vprec_current_ret_addr = __builtin_return_address(1);
 
 /******************** VPREC ARITHMETIC FUNCTIONS ********************
@@ -1262,46 +1262,46 @@ void _interflop_exit_function(interflop_function_stack_t *stack, void *context,
  **********************************************************************/
 
 static void _interflop_add_float(float a, float b, float *c, void *context) {
-  _vprec_get_current_return_address;
+  _vprec_get_current_return_address();
   *c = _vprec_binary32_binary_op(a, b, vprec_add, context);
 }
 
 static void _interflop_sub_float(float a, float b, float *c, void *context) {
-  _vprec_get_current_return_address;
+  _vprec_get_current_return_address();
   *c = _vprec_binary32_binary_op(a, b, vprec_sub, context);
 }
 
 static void _interflop_mul_float(float a, float b, float *c, void *context) {
-  _vprec_get_current_return_address;
+  _vprec_get_current_return_address();
   *c = _vprec_binary32_binary_op(a, b, vprec_mul, context);
 }
 
 static void _interflop_div_float(float a, float b, float *c, void *context) {
-  _vprec_get_current_return_address;
+  _vprec_get_current_return_address();
   *c = _vprec_binary32_binary_op(a, b, vprec_div, context);
 }
 
 static void _interflop_add_double(double a, double b, double *c,
                                   void *context) {
-  _vprec_get_current_return_address;
+  _vprec_get_current_return_address();
   *c = _vprec_binary64_binary_op(a, b, vprec_add, context);
 }
 
 static void _interflop_sub_double(double a, double b, double *c,
                                   void *context) {
-  _vprec_get_current_return_address;
+  _vprec_get_current_return_address();
   *c = _vprec_binary64_binary_op(a, b, vprec_sub, context);
 }
 
 static void _interflop_mul_double(double a, double b, double *c,
                                   void *context) {
-  _vprec_get_current_return_address;
+  _vprec_get_current_return_address();
   *c = _vprec_binary64_binary_op(a, b, vprec_mul, context);
 }
 
 static void _interflop_div_double(double a, double b, double *c,
                                   void *context) {
-  _vprec_get_current_return_address;
+  _vprec_get_current_return_address();
   *c = _vprec_binary64_binary_op(a, b, vprec_div, context);
 }
 
