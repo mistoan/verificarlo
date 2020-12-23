@@ -479,7 +479,8 @@ static float _vprec_round_binary32(float a, char is_input, void *context,
           vfc_hashmap_get(_vprec_absErr_map, (size_t)_vprec_current_ret_addr);
       /* save the value of the exponent from the context */
       absErr_exp_saved = currentContext->absErr_exp;
-      /* update the value in the exponent and mark the need for reverting the changes */
+      /* update the value in the exponent and mark the need for reverting the
+       * changes */
       currentContext->absErr_exp = *((int *)newAbsErr_exp);
       mustUpdateContext = true;
     }
@@ -563,7 +564,8 @@ static double _vprec_round_binary64(double a, char is_input, void *context,
           vfc_hashmap_get(_vprec_absErr_map, (size_t)_vprec_current_ret_addr);
       /* save the value of the exponent from the context */
       absErr_exp_saved = currentContext->absErr_exp;
-      /* update the value in the exponent and mark the need for reverting the changes */
+      /* update the value in the exponent and mark the need for reverting the
+       * changes */
       currentContext->absErr_exp = *((int *)newAbsErr_exp);
       mustUpdateContext = true;
     }
