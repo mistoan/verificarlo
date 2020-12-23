@@ -416,7 +416,7 @@ static float _vprec_round_binary32(float a, char is_input, void *context,
   /* when absErr mode is active, check if the value for the exponent 
    * can be set from file */
   if (currentContext->absErr == true) {
-    void *newAbsErr_exp = vfc_hashmap_get(vprec_absErr_map, (size_t)_vprec_current_ret_addr);
+    void *newAbsErr_exp = vfc_hashmap_get(_vprec_absErr_map, (size_t)_vprec_current_ret_addr);
     if (newAbsErr_exp != NULL) {
       absErr_exp_local = *((int *)newAbsErr_exp);
     }
@@ -516,7 +516,7 @@ static double _vprec_round_binary64(double a, char is_input, void *context,
   /* when absErr mode is active, check if the value for the exponent 
    * can be set from file */
   if (currentContext->absErr == true) {
-    void *newAbsErr_exp = vfc_hashmap_get(vprec_absErr_map, (size_t)_vprec_current_ret_addr);
+    void *newAbsErr_exp = vfc_hashmap_get(_vprec_absErr_map, (size_t)_vprec_current_ret_addr);
     if (newAbsErr_exp != NULL) {
       absErr_exp_local = *((int *)newAbsErr_exp);
     }
