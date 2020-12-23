@@ -534,7 +534,8 @@ static double _vprec_round_binary64(double a, char is_input, void *context,
                                     int binary64_range,
                                     int binary64_precision) {
   t_context *currentContext = (t_context *)context;
-  int absErr_exp_local = currentContext->absErr_exp;
+  bool mustUpdateContext = false;
+  int absErr_exp_saved;
 
   /* test if 'a' is a special case */
   if (!isfinite(a)) {
@@ -544,10 +545,15 @@ static double _vprec_round_binary64(double a, char is_input, void *context,
   /* when absErr mode is active, check if the value for the exponent
    * can be set from file */
   if (currentContext->absErr == true) {
-    void *newAbsErr_exp =
-        vfc_hashmap_get(_vprec_absErr_map, (size_t)_vprec_current_ret_addr);
-    if (newAbsErr_exp != NULL) {
-      absErr_exp_local = *((int *)newAbsErr_exp);
+    /* check if there is information on the exponent for the maximum error */
+    if (vfc_hashmap_have(_vprec_absErr_map, (size_t)_vprec_current_ret_addr)) {
+      void *newAbsErr_exp =
+          vfc_hashmap_get(_vprec_absErr_map, (size_t)_vprec_current_ret_addr);
+      /* save the value of the exponent from the context */
+      absErr_exp_saved = currentContext->absErr_exp;
+      /* update the value in the exponent and mark the need for reverting the changes */
+      currentContext->absErr_exp = *((int *)newAbsErr_exp);
+      mustUpdateContext = true;
     }
   }
 
@@ -597,6 +603,12 @@ static double _vprec_round_binary64(double a, char is_input, void *context,
       /* relative error mode */
       a = round_binary64_normal(a, binary64_precision);
     }
+  }
+
+  /* when absErr mode is active, check if the value for the exponent
+   * was set from file and if the context needs to be restored */
+  if ((currentContext->absErr == true) && (mustUpdateContext == true)) {
+    currentContext->absErr_exp = absErr_exp_saved;
   }
 
   return a;
