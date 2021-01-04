@@ -462,7 +462,6 @@ void _vprec_read_absErr_hashmap(FILE *fin) {
 static float _vprec_round_binary32(float a, char is_input, void *context,
                                    int binary32_range, int binary32_precision) {
   t_context *currentContext = (t_context *)context;
-  bool mustUpdateContext = false;
   int absErr_exp_saved;
 
   /* test if 'a' is a special case */
@@ -479,10 +478,8 @@ static float _vprec_round_binary32(float a, char is_input, void *context,
           vfc_hashmap_get(_vprec_absErr_map, (size_t)_vprec_current_ret_addr);
       /* save the value of the exponent from the context */
       absErr_exp_saved = currentContext->absErr_exp;
-      /* update the value in the exponent and mark the need for reverting the
-       * changes */
+      /* update exponent value and mark the need for reverting the changes */
       currentContext->absErr_exp = *((int *)newAbsErr_exp);
-      mustUpdateContext = true;
     }
   }
 
@@ -535,7 +532,8 @@ static float _vprec_round_binary32(float a, char is_input, void *context,
 
   /* when absErr mode is active, check if the value for the exponent
    * was set from file and if the context needs to be restored */
-  if ((currentContext->absErr == true) && (mustUpdateContext == true)) {
+  if ((currentContext->absErr == true) &&
+      vfc_hashmap_have(_vprec_absErr_map, (size_t)_vprec_current_ret_addr)) {
     currentContext->absErr_exp = absErr_exp_saved;
   }
 
@@ -547,7 +545,6 @@ static double _vprec_round_binary64(double a, char is_input, void *context,
                                     int binary64_range,
                                     int binary64_precision) {
   t_context *currentContext = (t_context *)context;
-  bool mustUpdateContext = false;
   int absErr_exp_saved;
 
   /* test if 'a' is a special case */
@@ -564,10 +561,8 @@ static double _vprec_round_binary64(double a, char is_input, void *context,
           vfc_hashmap_get(_vprec_absErr_map, (size_t)_vprec_current_ret_addr);
       /* save the value of the exponent from the context */
       absErr_exp_saved = currentContext->absErr_exp;
-      /* update the value in the exponent and mark the need for reverting the
-       * changes */
+      /* update exponent value and mark the need for reverting the changes */
       currentContext->absErr_exp = *((int *)newAbsErr_exp);
-      mustUpdateContext = true;
     }
   }
 
@@ -621,7 +616,8 @@ static double _vprec_round_binary64(double a, char is_input, void *context,
 
   /* when absErr mode is active, check if the value for the exponent
    * was set from file and if the context needs to be restored */
-  if ((currentContext->absErr == true) && (mustUpdateContext == true)) {
+  if ((currentContext->absErr == true) &&
+      vfc_hashmap_have(_vprec_absErr_map, (size_t)_vprec_current_ret_addr)) {
     currentContext->absErr_exp = absErr_exp_saved;
   }
 
