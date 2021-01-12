@@ -65,7 +65,7 @@
 #define CALL_OP_SIZE 4
 #endif
 
- #define LEVELS_TO_USER_CODE 3
+#define LEVELS_TO_USER_CODE 3
 
 typedef enum {
   KEY_PREC_B32,
@@ -431,7 +431,7 @@ inline double handle_binary64_normal_absErr(double a, int64_t aexp,
   return retVal;
 }
 
-//re-write this function to allocate space for all the data needed
+// re-write this function to allocate space for all the data needed
 void _vprec_read_absErr_hashmap(FILE *fin) {
   int *newAbsErr;
   void *callRetAddr;
@@ -455,7 +455,8 @@ void _vprec_read_absErr_hashmap(FILE *fin) {
 //   _vprec_current_ret_addr = __builtin_return_address(1) - CALL_OP_SIZE;
 #define _vprec_get_current_return_address()                                    \
   backtrace(_vprec_ret_addresses, LEVELS_TO_USER_CODE);                        \
-  _vprec_current_ret_addr = _vprec_ret_addresses[LEVELS_TO_USER_CODE-1];// - CALL_OP_SIZE;
+  _vprec_current_ret_addr =                                                    \
+      _vprec_ret_addresses[LEVELS_TO_USER_CODE - 1]; // - CALL_OP_SIZE;
 
 /******************** VPREC ARITHMETIC FUNCTIONS ********************
  * The following set of functions perform the VPREC operation. Operands
@@ -593,12 +594,15 @@ static double _vprec_round_binary64(double a, char is_input, void *context,
       /* update exponent value and mark the need for reverting the changes */
       currentContext->absErr_exp = *((int *)newAbsErr_exp);
 
-      // printf("\nfound instruction with custom error exponent: %p\t%d\n", _vprec_current_ret_addr, *((int *)newAbsErr_exp));
+      // printf("\nfound instruction with custom error exponent: %p\t%d\n",
+      // _vprec_current_ret_addr, *((int *)newAbsErr_exp));
 
       // printf("\ncontents of the abs err hashmap:\n");
       // for (int i = 0; i < _vprec_absErr_map->capacity; i++) {
-      //   if (get_value_at(_vprec_absErr_map->items, i) != 0 && get_value_at(_vprec_absErr_map->items, i) != 1) {
-      //     printf("%p\t%d\n", (void *)get_key_at(_vprec_absErr_map->items, i), *((int *)(get_value_at(_vprec_absErr_map->items, i))));
+      //   if (get_value_at(_vprec_absErr_map->items, i) != 0 &&
+      //   get_value_at(_vprec_absErr_map->items, i) != 1) {
+      //     printf("%p\t%d\n", (void *)get_key_at(_vprec_absErr_map->items, i),
+      //     *((int *)(get_value_at(_vprec_absErr_map->items, i))));
       //   }
       // }
     }
