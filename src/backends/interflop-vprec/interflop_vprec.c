@@ -43,6 +43,8 @@
 #include <string.h>
 #include <strings.h>
 
+#include <execinfo.h>
+
 #include "../../common/float_const.h"
 #include "../../common/float_struct.h"
 #include "../../common/float_utils.h"
@@ -50,6 +52,20 @@
 #include "../../common/logger.h"
 #include "../../common/vfc_hashmap.h"
 #include "../../common/vprec_tools.h"
+
+/* In delta-debug we retrieve the return address of
+ * instrumented operations. Call op size allows us
+ * to compute the previous instruction so that the
+ * user sees the address of the actual operation */
+#ifdef __x86_64__
+#define CALL_OP_SIZE 5
+#else
+/* On other architectures we assume an instruction is
+ * 4 bytes */
+#define CALL_OP_SIZE 4
+#endif
+
+ #define LEVELS_TO_USER_CODE 3
 
 typedef enum {
   KEY_PREC_B32,
@@ -117,6 +133,7 @@ static const char *vprec_absErr_file = NULL;
 vfc_hashmap_t _vprec_absErr_map;
 
 void *_vprec_current_ret_addr = NULL;
+void *_vprec_ret_addresses[10];
 
 /* define the possible VPREC operation */
 typedef enum {
@@ -414,21 +431,31 @@ inline double handle_binary64_normal_absErr(double a, int64_t aexp,
   return retVal;
 }
 
+//re-write this function to allocate space for all the data needed
 void _vprec_read_absErr_hashmap(FILE *fin) {
-  int newAbsErr;
+  int *newAbsErr;
   void *callRetAddr;
 
   if (fin != NULL) {
-    while (fscanf(fin, "%p\t%d\n", &callRetAddr, &newAbsErr) == 2) {
+    // printf("\nabsErr file present. contents:\n");
+    newAbsErr = (int *)malloc(sizeof(int));
+    while (fscanf(fin, "%p\t%d\n", &callRetAddr, newAbsErr) == 2) {
+      // to simplify computetions, we're interested in the return address,
+      //  not the address of the instruction itself
       // insert in the hashmap
-      vfc_hashmap_insert(_vprec_absErr_map, (size_t)callRetAddr,
-                         (void *)(&newAbsErr));
+      vfc_hashmap_insert(_vprec_absErr_map, (size_t)callRetAddr + CALL_OP_SIZE,
+                         (void *)newAbsErr);
+      // printf("%p\t%d\n", callRetAddr + CALL_OP_SIZE, *newAbsErr);
+      newAbsErr = (int *)malloc(sizeof(int));
     }
   }
 }
 
+// #define _vprec_get_current_return_address()                                    \
+//   _vprec_current_ret_addr = __builtin_return_address(1) - CALL_OP_SIZE;
 #define _vprec_get_current_return_address()                                    \
-  _vprec_current_ret_addr = __builtin_return_address(1);
+  backtrace(_vprec_ret_addresses, LEVELS_TO_USER_CODE);                        \
+  _vprec_current_ret_addr = _vprec_ret_addresses[LEVELS_TO_USER_CODE-1];// - CALL_OP_SIZE;
 
 /******************** VPREC ARITHMETIC FUNCTIONS ********************
  * The following set of functions perform the VPREC operation. Operands
@@ -547,6 +574,8 @@ static double _vprec_round_binary64(double a, char is_input, void *context,
   t_context *currentContext = (t_context *)context;
   int absErr_exp_saved;
 
+  // printf("\ncurrent return address: %p\n", _vprec_current_ret_addr);
+
   /* test if 'a' is a special case */
   if (!isfinite(a)) {
     return a;
@@ -563,6 +592,15 @@ static double _vprec_round_binary64(double a, char is_input, void *context,
       absErr_exp_saved = currentContext->absErr_exp;
       /* update exponent value and mark the need for reverting the changes */
       currentContext->absErr_exp = *((int *)newAbsErr_exp);
+
+      // printf("\nfound instruction with custom error exponent: %p\t%d\n", _vprec_current_ret_addr, *((int *)newAbsErr_exp));
+
+      // printf("\ncontents of the abs err hashmap:\n");
+      // for (int i = 0; i < _vprec_absErr_map->capacity; i++) {
+      //   if (get_value_at(_vprec_absErr_map->items, i) != 0 && get_value_at(_vprec_absErr_map->items, i) != 1) {
+      //     printf("%p\t%d\n", (void *)get_key_at(_vprec_absErr_map->items, i), *((int *)(get_value_at(_vprec_absErr_map->items, i))));
+      //   }
+      // }
     }
   }
 
@@ -1594,7 +1632,7 @@ void _interflop_finalize(void *context) {
   vfc_hashmap_destroy(_vprec_func_map);
 
   /* free vprec_absErr_map */
-  vfc_hashmap_free(_vprec_absErr_map);
+  // vfc_hashmap_free(_vprec_absErr_map);
 
   /* destroy _vprec_absErr_map */
   vfc_hashmap_destroy(_vprec_absErr_map);
