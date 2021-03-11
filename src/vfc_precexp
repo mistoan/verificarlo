@@ -12,6 +12,7 @@ import subprocess
 import signal
 from os import listdir
 import argparse
+import time
 
 vfc_profile_file = "vfc_profile.txt"
 vfc_config_file = "vfc_config.txt"
@@ -361,6 +362,7 @@ def search_minimum_arguments(	runPath,
 
 
 if __name__ == "__main__":
+    program_start_time = time.clock()
     
     parser = argparse.ArgumentParser(description="The vfc_precexp script tries "
                                      "to minimize the precision for each function "
@@ -427,6 +429,8 @@ if __name__ == "__main__":
     #########################################
     #  				Profile Run 			#
     #########################################
+    start_time = time.clock()
+    
     # unset input file
     if "VFC_PREC_INPUT" in env:
         unset_environment_variable("VFC_PREC_INPUT", env)
@@ -441,11 +445,16 @@ if __name__ == "__main__":
     # get dataset
     FunctionsFrame, FunctionsIndex, ArgumentsFrame = getProfile(
         vfc_profile_file, function_list)
+    
+    profile_time = time.clock() - start_time
+    print("Profiling run took: %s", profile_time)
 
     #########################################
     #  				Explore Operations 	    #
     #########################################
     if (vfc_mode == "operations") :
+        start_time = time.clock()
+        
         print("-------------- Operations --------------")
         
         # set backend
@@ -468,11 +477,16 @@ if __name__ == "__main__":
             cpt += 1
 
         FunctionsFrameCopy.to_csv("vfc_exp_data/OperationsResults.csv")
+        
+        explore_ops_time = time.clock() - start_time
+        print("Operations exploration took: %s", explore_ops_time)
 
     #########################################
     #  				Explore Arguments 		#
     #########################################
     if (vfc_mode == "arguments") :
+        start_time = time.clock()
+        
         print("-------------- Arguments --------------")
         
         # set backend
@@ -500,11 +514,16 @@ if __name__ == "__main__":
                 cpt += 1
 
         ArgumentsFrameCopy.to_csv("vfc_exp_data/ArgumentsResults.csv")
+        
+        explore_args_time = time.clock() - start_time
+        print("Arguments exploration took: %s", explore_args_time)
 
     #########################################
     #  				Explore All 			#
     #########################################
     if (vfc_mode == "all") :
+        start_time = time.clock()
+        
         print("-------------- All --------------")
         
         # set backend
@@ -544,3 +563,9 @@ if __name__ == "__main__":
 
         ArgumentsFrameCopy.to_csv("vfc_exp_data/AllArgsResults.csv")
         FunctionsFrameCopy.to_csv("vfc_exp_data/AllOpsResults.csv")
+        
+        explore_all_time = time.clock() - start_time
+        print("Operations and Arguments exploration took: %s", explore_all_time)
+        
+    total_time = time.clock() - program_start_time
+    print("Total execution time: %s", total_time)
