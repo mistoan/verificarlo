@@ -247,6 +247,9 @@ def dich_search_operations(index,
                            Arguments,
                            Operations):
     """ Dichotomic research to find the minimum precision for given field """
+    
+    # keep track of the number of executions
+    execCount = 1
 
     Operations.at[index, field] = l
 
@@ -255,6 +258,7 @@ def dich_search_operations(index,
         while flag:
             p = math.floor((r + l) / 2)
             Operations.at[index, field] = p
+            execCount += 1
             if Check(runPath, cmpPath, reference_dir, current_dir, config_file, env, Arguments, Operations):
                 if l >= r:
                     flag = 0
@@ -262,6 +266,8 @@ def dich_search_operations(index,
                 r = p
             else:
                 l = p+1
+                
+    return execCount
 
 
 def search_minimum_operations(	runPath,
@@ -274,14 +280,17 @@ def search_minimum_operations(	runPath,
                                Operations,
                                index):
     """ Find the minimum precision for the internal operations of the given function """
+    
+    # keep track of the number of executions
+    totalExecCount = 0
 
     # if the function uses double precision operations
     if Operations.at[index, 'Double']:
         # minimize mantissa
-        dich_search_operations(index, 'Prec64', 1, 52, runPath, cmpPath,
+        totalExecCount += dich_search_operations(index, 'Prec64', 1, 52, runPath, cmpPath,
                                reference_dir, current_dir, config_file, env, Arguments, Operations)
         # minimize exponent
-        dich_search_operations(index, 'Range64', 2, 11, runPath, cmpPath,
+        totalExecCount += dich_search_operations(index, 'Range64', 2, 11, runPath, cmpPath,
                                reference_dir, current_dir, config_file, env, Arguments, Operations)
     else:
         Operations.at[index, 'Prec64'] = 1
@@ -290,14 +299,16 @@ def search_minimum_operations(	runPath,
     # if the function uses simple precision operations
     if Operations.at[index, 'Float']:
         # minimize mantissa
-        dich_search_operations(index, 'Prec32', 1, 23, runPath, cmpPath,
+        totalExecCount += dich_search_operations(index, 'Prec32', 1, 23, runPath, cmpPath,
                                reference_dir, current_dir, config_file, env, Arguments, Operations)
         # minimize exponent
-        dich_search_operations(index, 'Range32', 2, 8, runPath, cmpPath,
+        totalExecCount += dich_search_operations(index, 'Range32', 2, 8, runPath, cmpPath,
                                reference_dir, current_dir, config_file, env, Arguments, Operations)
     else:
         Operations.at[index, 'Prec32'] = 1
         Operations.at[index, 'Range32'] = 2
+        
+    return totalExecCount
 
 
 def dich_search_arguments(index,
@@ -313,6 +324,9 @@ def dich_search_arguments(index,
                           Arguments,
                           Operations):
     """ Dichotomic research to find the minimum precision for given field """
+    
+    # keep track of the number of executions
+    execCount = 1
 
     Arguments.at[index, field] = l
 
@@ -322,6 +336,7 @@ def dich_search_arguments(index,
         while flag:
             p = math.floor((r + l) / 2)
             Arguments.at[index, field] = p
+            execCount += 1
             if Check(runPath, cmpPath, reference_dir, current_dir, config_file, env, Arguments, Operations):
                 if l >= r:
                     flag = 0
@@ -329,6 +344,8 @@ def dich_search_arguments(index,
                 r = p
             else:
                 l = p+1
+                
+    return execCount
 
 
 def search_minimum_arguments(	runPath,
@@ -341,28 +358,34 @@ def search_minimum_arguments(	runPath,
                               Operations,
                               index):
     """ Find the minimum precision for a given argument of a function """
+    
+    # keep track of the number of executions
+    execCount = 0
 
     # If is a float or float ptr
     if Arguments.at[index, 'Type'] == 0 or Arguments.at[index, 'Type'] == 2:
         # minimize mantissa
-        dich_search_arguments(index, 'Prec', 1, 23, runPath, cmpPath,
+        execCount += dich_search_arguments(index, 'Prec', 1, 23, runPath, cmpPath,
                               reference_dir, current_dir, config_file, env, Arguments, Operations)
         # minimize exponent
-        dich_search_arguments(index, 'Range', 2, 8, runPath, cmpPath,
+        execCount += dich_search_arguments(index, 'Range', 2, 8, runPath, cmpPath,
                               reference_dir, current_dir, config_file, env, Arguments, Operations)
 
     # If is a double or double ptr
     elif Arguments.at[index, 'Type'] == 1 or Arguments.at[index, 'Type'] == 3:
         # minimize mantissa
-        dich_search_arguments(index, 'Prec', 1, 52, runPath, cmpPath,
+        execCount += dich_search_arguments(index, 'Prec', 1, 52, runPath, cmpPath,
                               reference_dir, current_dir, config_file, env, Arguments, Operations)
         # minimize exponent
-        dich_search_arguments(index, 'Range', 2, 11, runPath, cmpPath,
+        execCount += dich_search_arguments(index, 'Range', 2, 11, runPath, cmpPath,
                               reference_dir, current_dir, config_file, env, Arguments, Operations)
+        
+    return execCount
 
 
 if __name__ == "__main__":
     program_start_time = time.clock()
+    totalExecCount = 0
     
     parser = argparse.ArgumentParser(description="The vfc_precexp script tries "
                                      "to minimize the precision for each function "
@@ -441,6 +464,7 @@ if __name__ == "__main__":
 
     # run to create profile file
     run(runPath, output_dir[0], env)
+    totalExecCount += 1
 
     # get dataset
     FunctionsFrame, FunctionsIndex, ArgumentsFrame = getProfile(
@@ -454,6 +478,7 @@ if __name__ == "__main__":
     #########################################
     if (vfc_mode == "operations") :
         start_time = time.clock()
+        opsExecCount = 0
         
         print("-------------- Operations --------------")
         
@@ -465,27 +490,30 @@ if __name__ == "__main__":
         cpt = 1
         for i in FunctionsIndex:
             print(cpt, "/", len(FunctionsIndex))
-            search_minimum_operations(	runPath,
-                                    cmpPath,
-                                    output_dir[0],
-                                    output_dir[1],
-                                    vfc_config_file,
-                                    env,
-                                    ArgumentsFrame,
-                                    FunctionsFrameCopy,
-                                    i)
+            opsExecCount += search_minimum_operations(	runPath,
+                                                        cmpPath,
+                                                        output_dir[0],
+                                                        output_dir[1],
+                                                        vfc_config_file,
+                                                        env,
+                                                        ArgumentsFrame,
+                                                        FunctionsFrameCopy,
+                                                        i)
             cpt += 1
 
         FunctionsFrameCopy.to_csv("vfc_exp_data/OperationsResults.csv")
         
         explore_ops_time = time.clock() - start_time
         print("Operations exploration took: %s", explore_ops_time)
+        print("\t{} runs executed".format(opsExecCount))
+        totalExecCount += opsExecCount
 
     #########################################
     #  				Explore Arguments 		#
     #########################################
     if (vfc_mode == "arguments") :
         start_time = time.clock()
+        argsExecCount = 0
         
         print("-------------- Arguments --------------")
         
@@ -501,15 +529,15 @@ if __name__ == "__main__":
                 ArgumentsFrameCopy['ID'] == FunctionsFrameCopy.at[i, 'ID'])]
             for j in tmp.index:
                 print(cpt, "/", len(ArgumentsFrameCopy.index))
-                search_minimum_arguments(	runPath,
-                                        cmpPath,
-                                        output_dir[0],
-                                        output_dir[1],
-                                        vfc_config_file,
-                                        env,
-                                        ArgumentsFrameCopy,
-                                        FunctionsFrameCopy,
-                                        j)
+                argsExecCount += search_minimum_arguments(	runPath,
+                                                            cmpPath,
+                                                            output_dir[0],
+                                                            output_dir[1],
+                                                            vfc_config_file,
+                                                            env,
+                                                            ArgumentsFrameCopy,
+                                                            FunctionsFrameCopy,
+                                                            j)
 
                 cpt += 1
 
@@ -517,12 +545,15 @@ if __name__ == "__main__":
         
         explore_args_time = time.clock() - start_time
         print("Arguments exploration took: %s", explore_args_time)
+        print("\t{} runs executed".format(argsExecCount))
+        totalExecCount += argsExecCount
 
     #########################################
     #  				Explore All 			#
     #########################################
     if (vfc_mode == "all") :
         start_time = time.clock()
+        allExecCount = 0
         
         print("-------------- All --------------")
         
@@ -536,25 +567,25 @@ if __name__ == "__main__":
         for i in range(len(FunctionsFrameCopy.index)):
             print(cpt, "/", len(FunctionsFrameCopy.index))
             for j in tmp.index:
-                search_minimum_arguments(	runPath,
-                                        cmpPath,
-                                        output_dir[0],
-                                        output_dir[1],
-                                        vfc_config_file,
-                                        env,
-                                        ArgumentsFrameCopy,
-                                        FunctionsFrameCopy,
-                                        j)
+                allExecCount += search_minimum_arguments(	runPath,
+                                                            cmpPath,
+                                                            output_dir[0],
+                                                            output_dir[1],
+                                                            vfc_config_file,
+                                                            env,
+                                                            ArgumentsFrameCopy,
+                                                            FunctionsFrameCopy,
+                                                            j)
             if i in FunctionsIndex:
-                search_minimum_operations(	runPath,
-                                        cmpPath,
-                                        output_dir[0],
-                                        output_dir[1],
-                                        vfc_config_file,
-                                        env,
-                                        ArgumentsFrameCopy,
-                                        FunctionsFrameCopy,
-                                        i)
+                allExecCount += search_minimum_operations(	runPath,
+                                                            cmpPath,
+                                                            output_dir[0],
+                                                            output_dir[1],
+                                                            vfc_config_file,
+                                                            env,
+                                                            ArgumentsFrameCopy,
+                                                            FunctionsFrameCopy,
+                                                            i)
 
             tmp = ArgumentsFrameCopy[(
                 ArgumentsFrameCopy['ID'] == FunctionsFrameCopy.at[i, 'ID'])]
@@ -566,6 +597,9 @@ if __name__ == "__main__":
         
         explore_all_time = time.clock() - start_time
         print("Operations and Arguments exploration took: %s", explore_all_time)
+        print("\t{} runs executed".format(allExecCount))
+        totalExecCount += allExecCount
         
     total_time = time.clock() - program_start_time
     print("Total execution time: %s", total_time)
+    print("\t{} total runs executed".format(totalExecCount))
