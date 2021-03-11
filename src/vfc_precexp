@@ -63,7 +63,12 @@ def shell(cmd, newEnv, maxTimeout=None):
                             stdout=subprocess.PIPE,
                             env=env)
 
-    proc.wait(maxTimeout)
+    try:
+        outs, errs = proc.communicate(timeout=maxTimeout)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        outs, errs = proc.communicate()
+        return 42
 
     return proc.returncode
 
